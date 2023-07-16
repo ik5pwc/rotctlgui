@@ -6,14 +6,29 @@
 .azimuth {
   font-family: 'digits', Fallback, sans-serif;
   position: absolute; 
-  
-  border: 2px solid white;
-  border-radius: 6px;
+  border: 1px solid white;
+  border-radius: 5px;
   background: rgba(80, 103, 193, 0.61);
   padding:0.3em;
   z-index:10;color:white;
-font-size: 1.5em;
-font-weight: bold;
-width:2.5em;
-text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  width:2.5em;
+  text-align: center;
+}
+
+.preset_new {
+  position: absolute;
+  top:0;
+  left:0;
+  font-family:Sans-serif; 
+  border: 0px; 
+  padding:0.3em;
+  z-index:10;
+  color:rgba(230, 50, 50, 1);   
+  font-size: 1.5em;
+  font-weight: bold;
+  width:2.5em;
+  text-align: center;
+  visibility: hidden;
 }
