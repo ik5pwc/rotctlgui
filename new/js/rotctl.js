@@ -3,7 +3,8 @@ const g_app = {
   compassCenterX : 0,
   compassCenterY : 0,
   compassRadius  : 0,
-  needleRadius   : 0
+  needleRadius   : 0,
+  needleLen      : 0
 }
 
 
@@ -38,6 +39,9 @@ function updateGlobal() {
   // If outer circle exist, then increase the value
   if (dataset.needleCircleOuter) {g_app.needle = g_app.compassRadius/100 * dataset.needleCircleSize;}
 
+  // Needle length
+  g_app.needleLen = g_app.compassRadius/100 * dataset.needleEnd;
+  
 } 
 
 
@@ -71,23 +75,37 @@ function preset(mouseX,mouseY) {
   let presetNew = document.getElementById("preset_new");          // overly for preset box
   let dist = 0;                                                   // pointer's distance from compass center
   let angle = 0;                                                  // pointer azimuth
-  
+  let angleRad=0;
   // Compute mouse distance from compass center
   dist = Math.sqrt(Math.pow(mouseX - g_app.compassCenterX,2) + Math.pow(mouseY - g_app.compassCenterY,2));
 
   // evaluate distance
   if (dist < g_app.compassRadius && dist > g_app.compassRadius*0.6) {
+    
     // Arguibly we are within the compass's degree, so compute the angle
-    angle = parseInt((Math.atan2( mouseX - g_app.compassCenterX, g_app.compassCenterY - mouseY) ) * 180/Math.PI);
-
+    //angle = parseInt((Math.atan2( mouseX - g_app.compassCenterX, g_app.compassCenterY - mouseY) ) * 180/Math.PI);
+    angleRad = (Math.atan2( mouseX - g_app.compassCenterX, g_app.compassCenterY - mouseY) ) ;
+    angle = parseInt(angleRad * 180/Math.PI);
+    
     // math.tan is a periodic function (0 to 180 degree) - Negative values are for 180-360 range
     if (angle < 0) { angle +=360;}
 	  
     // add highlight to compass
-    dataset.highlights = "[{\"from\": " + (angle-1) + ", \"to\": " + (angle +1) +", \"color\": \"rgba(200, 50, 50, .75)\"}]";
-	presetNew.style.top = mouseY + "px";
+    dataset.highlights = "[{\"from\": " + (angle-0.5) + ", \"to\": " + (angle + 0.5 ) +", \"color\": \"rgba(200, 50, 50, .75)\"}]";
+	
+	// show preset value near compass highlight
+	presetNew.style.top = g_app.compassCenterY - g_app.needleLen * Math.cos(angleRad) + "px";
+	console.log(Math.sin(angleRad)); 
+	//presetNew.style.top = mouseY + "px";
+	
 	presetNew.style.left = mouseX + "px";
 	presetNew.style.visibility = "visible";
+	
+	// Add current value
+	if (angle < 10 )  { presetNew.innerHTML = "00" + angle;} else
+    if (angle< 100 ) { presetNew.innerHTML = "0" + angle;} else
+    { presetNew.innerHTML = angle;}
+
 	     
 	// display degree box
   } else {
