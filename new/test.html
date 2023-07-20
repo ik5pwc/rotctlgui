@@ -28,8 +28,8 @@
 	</span>
 </div>
 
-<div>
-  <div style="position:absolute; top:40px;left:40px">
+<div class="container">
+  <div style="position:relative;top:0px;left:0px;">
     <canvas 
       id                             = "compass"
       data-type                      = "radial-gauge"
@@ -95,7 +95,7 @@ const compass = document.getElementById("compass");
 
 // This handler will be executed only once when the cursor
 // moves over the unordered list
-compass.addEventListener( "mousemove",(e) => {preset(e.clientX,e.clientY);}, false,);
+compass.addEventListener( "mousemove",(e) => {preset(e.layerX,e.layerY);}, false,);
 //compass.addEventListener( "mouseout",(e) => {clearPrese(), false,);
 
 </script>

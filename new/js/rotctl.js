@@ -70,6 +70,8 @@ function updateCompass(az){
 
 
 function preset(mouseX,mouseY) {
+ console.log("mouseX: " + mouseX);
+ console.log("mouseY: " + mouseY);
  
   const dataset = document.getElementById("compass").dataset;     // compass RadialGauge dataset shortcut
   let presetNew = document.getElementById("preset_new");          // overly for preset box
@@ -94,11 +96,11 @@ function preset(mouseX,mouseY) {
     dataset.highlights = "[{\"from\": " + (angle-0.5) + ", \"to\": " + (angle + 0.5 ) +", \"color\": \"rgba(200, 50, 50, .75)\"}]";
 	
 	// show preset value near compass highlight
-	presetNew.style.top = g_app.compassCenterY - g_app.needleLen * Math.cos(angleRad) + "px";
+	presetNew.style.top = g_app.compassCenterY - g_app.needleLen * Math.cos(angleRad) + parseInt(presetNew.clientHeight/2)  +"px";
 	console.log(Math.sin(angleRad)); 
 	//presetNew.style.top = mouseY + "px";
 	
-	presetNew.style.left = mouseX + "px";
+	presetNew.style.left = g_app.compassCenterX + g_app.needleLen * Math.sin(angleRad) -35+ "px";
 	presetNew.style.visibility = "visible";
 	
 	// Add current value

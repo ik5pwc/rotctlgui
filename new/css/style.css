@@ -3,9 +3,15 @@
   src: url("DSEG7Classic-Regular.woff") format('woff');
 }
 
+.container {
+  position: absolute;
+  padding-top:10px;
+  padding-left:10px;
+}
+  
 .azimuth {
   font-family: 'digits', Fallback, sans-serif;
-  position: absolute; 
+  position: relative; 
   border: 1px solid white;
   border-radius: 5px;
   background: rgba(80, 103, 193, 0.61);
@@ -18,11 +24,11 @@
 }
 
 .preset_new {
-  position: absolute;
+  position: relative;
   top:0;
   left:0;
   font-family:Sans-serif; 
-  border: 0px; 
+  border: 1px solid white; 
   padding:0.3em;
   z-index:10;
   color:rgba(230, 50, 50, 1);   
@@ -30,5 +36,5 @@
   font-weight: bold;
   width:2.5em;
   text-align: center;
-  visibility: hidden;
+  visibility: visible;
 }
