@@ -22,20 +22,20 @@
 
 </head>
 
-<body oncontextmenu="return false;" bgcolor="#252625">
+<body  bgcolor="#252625">
 <div>
 	<span id="header">
 	</span>
 </div>
 
 <div class="container">
-  <div style="position:relative;top:0px;left:0px;">
+  <div class="compass">
     <canvas 
       id                             = "compass"
       data-type                      = "radial-gauge"
       data-width                     = "360"
       data-height                    = "360"
-      data-title                     = "VHF Tower"
+      data-title                     = ""
       data-start-angle               = "180"
       data-value                     = "180"
       data-min-value                 = "0"
@@ -46,10 +46,10 @@
       data-border-inner-width        = "0"
       data-border-middle-width       = "0"
       data-border-shadow-width       = "0"
-      data-needle-width              = "3"
+      data-needle-width              = "4"
 	  data-needle-type               = "arrow"
 	  data-needle-end                = "90"
-	  data-needle-start              = "15"
+	  data-needle-start              = "14"
 	  data-color-needle              = "#d4aa00"
 	  data-color-needle-circle-inner = "#616161"
       data-needle-circle-size        = "13"
@@ -79,7 +79,7 @@
     ></canvas>
 
   </div>
-  <div id="degree" class="azimuth">000</div>
+  <div id="degree" class="degree">000</div>
   <div id="preset_new" class="preset_new" >new</div>
   <div id="preset_cur" style="position: absolute; top:120px; left:100px;z-index:100;color:red;">cur</div>
 </div>
@@ -95,8 +95,10 @@ const compass = document.getElementById("compass");
 
 // This handler will be executed only once when the cursor
 // moves over the unordered list
-compass.addEventListener( "mousemove",(e) => {preset(e.layerX,e.layerY);}, false,);
-//compass.addEventListener( "mouseout",(e) => {clearPrese(), false,);
+compass.addEventListener( "mousemove",(event) => {preset(event.layerX,event.layerY);}, false,);
+compass.addEventListener( "mouseout",() => {clearPreset();}, false,);
+compass.addEventListener( "click", (	) => {console.log("ccc");},false);
+compass.addEventListener( "contextmenu", ()=> {console.log("left");},false);
 
 </script>
     <script src="./js/rotctl.js" type="text/javascript"></script>

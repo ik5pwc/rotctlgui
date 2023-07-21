@@ -5,18 +5,25 @@
 
 .container {
   position: absolute;
-  padding-top:10px;
-  padding-left:10px;
+  top:20px;
+  left:20px;
 }
-  
-.azimuth {
+
+.compass {
+  position:relative;
+  top:0px;
+  left:0px;
+}
+ 
+.degree {
   font-family: 'digits', Fallback, sans-serif;
-  position: relative; 
+  position: absolute;; 
   border: 1px solid white;
   border-radius: 5px;
   background: rgba(80, 103, 193, 0.61);
   padding:0.3em;
-  z-index:10;color:white;
+  z-index:10;
+  color:white;
   font-size: 1.5em;
   font-weight: bold;
   width:2.5em;
@@ -24,17 +31,17 @@
 }
 
 .preset_new {
-  position: relative;
-  top:0;
-  left:0;
+  position: absolute;
+  top:30;
+  left:30;
   font-family:Sans-serif; 
-  border: 1px solid white; 
+  border: 0px; 
   padding:0.3em;
   z-index:10;
   color:rgba(230, 50, 50, 1);   
-  font-size: 1em;
+  font-size: 1.3em;
   font-weight: bold;
   width:2.5em;
   text-align: center;
-  visibility: visible;
+  visibility: hidden;
 }
