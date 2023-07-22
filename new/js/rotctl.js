@@ -6,7 +6,8 @@ const g_app = {
   needleRadius   : 0,
   needleLen      : 0,
   needleStart    : 0,
-  preset         : null
+  presetNew      : null,
+  presetCur      : null
 }
 
 
@@ -55,12 +56,20 @@ function updateGlobal() {
 function setOverlayDiv() {
   let degree = document.getElementById("degree");
   let presetNew = document.getElementById("preset_new");
+  let presetCur = document.getElementById("preset_cur");
   
+  // Position azimuth box
   degree.style.top = parseInt(g_app.compassCenterY + 1.1*g_app.needleStart) + "px";
   degree.style.left = parseInt(g_app.compassCenterX - degree.clientWidth/2 - degree.clientLeft ) + "px";
   
+  //position new preset box (usually hidden)
   presetNew.style.left = parseInt(g_app.compassCenterX - presetNew.clientWidth/2 - presetNew.clientLeft ) + "px"; 
   presetNew.style.top = parseInt(g_app.compassCenterY/2) + "px";
+
+  //position current preset box (usually hidden)
+  presetCur.style.left = parseInt(g_app.compassCenterX - presetCur.clientWidth/2 - presetCur.clientLeft ) + "px"; 
+  presetCur.style.top = degree.offsetTop + presetCur.clientHeight*1.2 + "px";
+
 }
 
 
@@ -108,7 +117,7 @@ function preset(mouseX,mouseY) {
 	{ presetNew.innerHTML = angle;}
 
     // save current preset in global variable
-    g_app.preset = angle;
+    g_app.presetNew = angle;
     	     
   } else {
 	// outside the valid annulus
@@ -122,11 +131,31 @@ function clearPreset() {
   document.getElementById("compass").dataset.highlights="";
   document.getElementById("preset_new").innertHTML="n/a";
   document.getElementById("preset_new").style.visibility = "hidden";
-  g_app.preset = null;
+  g_app.presetNew = null;
+}
+
+
+function leftClick() {
+  
+  if (g_app.presetNew != null) {
+	g_app.presetCur = g_app.presetNew;
+    document.getElementById("preset_cur").style.visibility = "visible";
+    document.getElementById("preset_cur").innerHTML  = document.getElementById("preset_new").innerHTML ;
+    
+    //document.getElementById("preset_new").style.visibility = "hidden";
+	
+	  
+	  
+  }	
+	
+	
 }
 
 
 
+function rightClick() {
+	
+	}
 
 
 
