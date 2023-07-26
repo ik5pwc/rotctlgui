@@ -95,10 +95,10 @@ const compass = document.getElementById("compass");
 
 // This handler will be executed only once when the cursor
 // moves over the unordered list
-compass.addEventListener( "mousemove",(event) => {preset(event.layerX,event.layerY);}, false,);
-compass.addEventListener( "mouseout",() => {clearPreset();}, false,);
-compass.addEventListener( "click", () => {leftClick();},false);
-compass.addEventListener( "contextmenu", ()=> {rightClick();},false);
+compass.addEventListener( "mousemove",(event) => {compassMouseMove(event.layerX,event.layerY);}, false,);
+compass.addEventListener( "mouseout",(event) => {compassMouseMove(event.layerX,event.layerY);}, false,);
+compass.addEventListener( "click", () => {compassLeftClick();},false);
+compass.addEventListener( "contextmenu", (e)=> {e.preventDefault();compassRightClick();},false);
 
 </script>
     <script src="./js/rotctl.js" type="text/javascript"></script>
@@ -106,13 +106,13 @@ compass.addEventListener( "contextmenu", ()=> {rightClick();},false);
   startApp();
 
 function test() {
-	let nextval = document.getElementById("compass").dataset.value -2;
-	 if (nextval < 0) {nextval += 360;}
+	let nextval = parseInt(document.getElementById("compass").dataset.value) + 2;
+	 if (nextval > 360) {nextval -= 360;}
 	 
      updateCompass  ( nextval);
 }
 
-//setInterval(test, 200);
+setInterval(test, 200);
 
 
 

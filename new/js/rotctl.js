@@ -6,6 +6,7 @@ const g_app = {
   needleRadius   : 0,
   needleLen      : 0,
   needleStart    : 0,
+  prevAz         : null,
   presetNew      : null,
   presetCur      : null
 }
@@ -46,8 +47,6 @@ function updateGlobal() {
   g_app.needleLen = g_app.compassRadius/100 * dataset.needleEnd;
   g_app.needleStart = g_app.compassRadius/100 * dataset.needleStart;
   
-  
-  
 } 
 
 
@@ -82,80 +81,104 @@ function updateCompass(az){
   compass.dataset.value = az;
   
   // Update degree box
-  if (az < 10 )  { degree.innerHTML = "00" + az;} else
-  if (az < 100 ) { degree.innerHTML = "0" + az;} else
-  { degree.innerHTML = az;}
+  degree.innerHTML = az.toString().padStart(3,"0");
+
+  // check if preset has been reached
+  if ( (g_app.prevAz != null)    &&  
+       (g_app.presetCur != null) && 
+       ( 
+         (g_app.prevAz <= g_app.presetCur && az >= g_app.presetCur) || 
+         (g_app.prevAz >= g_app.presetCur && az <= g_app.presetCur) 
+       )
+     ) {
+    g_app.presetCur = null;
+    managePresetGUI();
+  }
+		  
+  // update previous value
+  g_app.prevAz = az;
 }
 
 
 
-function preset(mouseX,mouseY) {
-  const dataset = document.getElementById("compass").dataset;     // compass RadialGauge dataset shortcut
-  let presetNew = document.getElementById("preset_new");          // overly for preset box
-  let dist = 0;                                                   // pointer's distance from compass center
-  let angle = 0;                                                  // pointer azimuth
+function evalPresetAngle(x,y) {
+  let dist = 0;            // pointer's distance from compass center
+  let angle = 0;           // pointer azimuth
 
   // Compute mouse distance from compass center
-  dist = Math.sqrt(Math.pow(mouseX - g_app.compassCenterX,2) + Math.pow(mouseY - g_app.compassCenterY,2));
+  dist = Math.sqrt(Math.pow(x - g_app.compassCenterX,2) + Math.pow(y - g_app.compassCenterY,2));
 
   // evaluate distance
   if (dist < g_app.compassRadius && dist > g_app.compassRadius*0.6) {
     
     // Arguibly we are within the compass's degree, so compute the angle
-    angle = parseInt((Math.atan2( mouseX - g_app.compassCenterX, g_app.compassCenterY - mouseY) ) * 180/Math.PI);
+    angle = parseInt((Math.atan2(x - g_app.compassCenterX, g_app.compassCenterY - y) ) * 180/Math.PI);
     
     // math.tan is a periodic function (0 to 180 degree) - Negative values are for 180-360 range
     if (angle < 0) { angle +=360;}
-	  
-    // add highlight to compass
-    dataset.highlights = "[{\"from\": " + (angle-0.75) + ", \"to\": " + (angle + 0.75 ) +", \"color\": \"rgba(200, 50, 50, .75)\"}]";
-	
-	// show preset value near compass highlight
-	presetNew.style.visibility = "visible";
-	if (angle < 10 )  { presetNew.innerHTML = "00" + angle;} else
-    if (angle< 100 ) { presetNew.innerHTML = "0" + angle;} else
-	{ presetNew.innerHTML = angle;}
 
     // save current preset in global variable
     g_app.presetNew = angle;
     	     
   } else {
 	// outside the valid annulus
-    clearPreset();
+    g_app.presetNew = null;
   }
 }
 
-
-
-function clearPreset() {
-  document.getElementById("compass").dataset.highlights="";
-  document.getElementById("preset_new").innertHTML="n/a";
-  document.getElementById("preset_new").style.visibility = "hidden";
-  g_app.presetNew = null;
-}
-
-
-function leftClick() {
+function managePresetGUI() {
+  const dataset = document.getElementById("compass").dataset;     // compass RadialGauge dataset shortcut
+  let presetNew = document.getElementById("preset_new");          // preset_new box shortcut
+  let presetCur = document.getElementById("preset_cur");          // preset_cur box shortcut
+  let highlight = "";
   
+  // Current preset indicator & boxes
+  if (g_app.presetCur != null) {
+    highlight += "{\"from\": " + (g_app.presetCur-0.75) + ", \"to\": " + (g_app.presetCur + 0.75 ) +", \"color\": \"rgba(63, 255, 183, .75)\"},"; 
+	presetCur.innerHTML = g_app.presetCur.toString().padStart(3,"0");
+	presetCur.style.visibility = "visible";  
+  } else {
+	presetCur.style.visibility = "hidden";
+  }
+  
+  // New preset compass indicator and boxes
   if (g_app.presetNew != null) {
-	g_app.presetCur = g_app.presetNew;
-    document.getElementById("preset_cur").style.visibility = "visible";
-    document.getElementById("preset_cur").innerHTML  = document.getElementById("preset_new").innerHTML ;
-    
-    //document.getElementById("preset_new").style.visibility = "hidden";
-	
-	  
-	  
-  }	
-	
-	
+	highlight += "{\"from\": " + (g_app.presetNew-0.75) + ", \"to\": " + (g_app.presetNew + 0.75 ) +", \"color\": \"rgba(200, 50, 50, .75)\"}"; 
+    presetNew.innerHTML = g_app.presetNew.toString().padStart(3,"0");
+    presetNew.style.visibility = "visible";
+  } else {
+    presetNew.style.visibility = "hidden";
+  }
+  
+  // Remove last comma if any
+  highlight = highlight.replace(/},$/,'}');
+  dataset.highlights="[" + highlight + "]";
+
+}	
+
+
+/* -------------------------- */
+/*       Event Handlers       */
+/* -------------------------- */
+
+function compassMouseMove (mouseX,mouseY){
+  evalPresetAngle (mouseX,mouseY);
+  managePresetGUI();
+}
+
+
+function compassLeftClick() {
+  if (g_app.presetNew != null) { g_app.presetCur = g_app.presetNew; }
+  managePresetGUI();
 }
 
 
 
-function rightClick() {
-	
-	}
+function compassRightClick() {
+  g_app.presetCur = null;
+  g_app.presetNew = null;
+  managePresetGUI();
+}
 
 
 
