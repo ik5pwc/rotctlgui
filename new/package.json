@@ -1,0 +1,16 @@
+{
+  "name": "rotctlgui",
+  "version": "1.0.0",
+  "description": "Graphical interface for HAMlib rotctl",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+  "author": "IK5PWC, CIVININI Luca <luca@ik5pwc.it>",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^25.3.2"
+  }
+}
