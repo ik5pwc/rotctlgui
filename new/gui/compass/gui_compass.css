@@ -3,6 +3,19 @@
   src: url("DSEG7Classic-Regular.woff") format('woff');
 }
 
+.netstatus {
+  height: 18px;
+  width: 18px;
+  background-color: red;
+  border-radius: 50%;
+  border:1px solid white;
+  /*display: inline-block;*/
+  position:relative;
+  top:-40px;
+  left:300px;
+}
+.on {background-color: green;}
+
 .container {
   position: absolute;
   top:20px;
@@ -29,6 +42,9 @@
   width:2.5em;
   text-align: center;
 }
+
+.off {background-color: rgba(234, 61, 61, 0.61)}
+.on {background: rgba(80, 103, 193, 0.61);}
 
 .preset_new {
   position: absolute;
