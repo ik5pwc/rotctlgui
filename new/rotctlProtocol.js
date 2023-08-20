@@ -10,7 +10,7 @@
 
 /* --------------------- Required modules --------------------- */
 const Net = require('node:net'); 
-const { globalEmitter } = require('./events.js');
+const { globalEmitter } = require('./node_events.js');
 const { send } = require('node:process');
 
 
@@ -50,6 +50,7 @@ const status = {            // Manage rotctl protocol and store rotor configurat
 
 exports.connect      = connect;
 exports.pointTo      = pointTo;
+exports.stopMotor    = stopMotor;
 exports.setAddress   = function (address) {rotctld.host = address;};
 exports.setPort      = function (port)    {rotctld.port = port;};
 exports.setPolling   = function (rate)    {rotctld.polling = rate;};
@@ -77,7 +78,7 @@ exports.getSouthStop = function () {return rotctld.southStop;};
  * Global variables used: 
  * . status                 (rotctlProtocol.js)
  * . rotctld                (rotctlProtocol.js)
- * . globalEmitter          (events.js)
+ * . globalEmitter          (node_events.js)
  *
  * Arguments:
  * . target: pointer to configuration structure managing all configuration states
@@ -153,6 +154,31 @@ function connect() {
 }
 
 
+
+/*------------------------------------------------------
+ * Function: stopMotor
+ * -------------------------------
+ * Immediatly stop motor 
+ *
+ * Invoked by:
+ * . startup                (main.js)
+ *
+ * Called Sub/Functions: 
+ * . sendCommand            (rotctlProtocol.js)
+ *
+ * Global variables used: NONE
+ *
+ * Arguments: NONE
+*/
+function stopMotor() {
+  console.log("Stopping motor");
+  
+  // Generic connection parameters
+  sendCommand("+S");
+}
+
+
+
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Module (private) functions                                         /*
 /* --------------------------------------------------------------------------------------------------------- */
@@ -209,28 +235,48 @@ function sendCommand(cmd) {
 
 
 
-
-
-
+/*------------------------------------------------------
+ * Function: checkReply
+ * -------------------------------
+ * Evaluate replies to sent commands
+ *
+ * Invoked by:
+ * . hdata                  (rotctlProtocol.js)
+ *
+ * Called Sub/Functions: 
+ * . replyCapabilities      (rotctlProtocol.js)
+ * . replyGetPos            (rotctlProtocol.js)
+ * . replySetPos            (rotctlProtocol.js)
+ * . manageProtocolError    (rotctlProtocol.js)
+ * 
+ * Global variables used: 
+ * . status                 (rotctlProtocol.js)
+ * 
+ * Arguments: 
+ * . reply: string containing reply to be evaluated
+*/
 function checkReply(reply) {
   let replyOK = false;        // by default reply is wrong
 
   switch (status.sent.pop().substring(0,2)) {
 
     case "1" : replyOK = replyCapabilities(reply); break; 
-    case "+p": replyOK = replyGetPos(reply); break;
-    case "+P":                              // Move to position
-      let replySetPos = reply.match('set_pos: (-?[0-9]{1,})\.[0-9]{1,} 0.0');
-      if (replySetPos != undefined) {replyOK = true;}
-      break;    
-
-    case "+S": replyOK = true; break;       // Reply to Stop command    
-    case "+M": replyOK = true; break;       // Reply to Move command
+    case "+p": replyOK = replyGetPos(reply)      ; break;
+    case "+P": replyOK = replySetPos(reply)      ; break;       
+    case "+S": replyOK = true                    ; break;       // Reply to Stop command    
+    case "+M": replyOK = true                    ; break;       // Reply to Move command
   }
 
   // if reply has been successfull parsed, then clear error control else evaulate communications
   if (replyOK) {status.errors = 0;} else {manageProtocolError();}
 }
+
+
+function replySetPos(buffer) {
+  let replySetPos = buffer.match('set_pos: (-?[0-9]{1,})\.[0-9]{1,} 0.0');
+  if (replySetPos != undefined) {return true;} else {return false;}
+}
+
 
 
 function replyCapabilities(buffer) {

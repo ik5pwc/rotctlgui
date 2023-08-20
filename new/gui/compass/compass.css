@@ -1,6 +1,10 @@
 @font-face {
   font-family: "digits";
-  src: url("DSEG7Classic-Regular.woff") format('woff');
+  src: url("compass_7seg.woff") format('woff');
+}
+
+body {
+  background-color: #252625;
 }
 
 .netstatus {

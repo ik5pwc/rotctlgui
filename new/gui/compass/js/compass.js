@@ -1,3 +1,14 @@
+/* --------------------------------------------------------------------------------------- 
+ * File        : gui/compass/js/compass.js
+ * Author      : Civinini Luca - IK5PWC
+ *               luca@ik5pwc.it
+ *               http://www.ik5pwc.it
+ *
+ * Description : Javascipt functions used within the compass page
+ * ---------------------------------------------------------------------------------------
+*/
+
+
 // object storing additional data for this application
 const g_gui = {
   compassCenterX : 0,
@@ -6,14 +17,32 @@ const g_gui = {
   needleRadius   : 0,
   needleLen      : 0,
   needleStart    : 0,
-  prevAz         : null,
   presetNew      : null,
   presetCur      : null,
   connected      : false
 };
 
 
-// Update global objects data
+
+/*------------------------------------------------------
+ * Function: updateGlobal
+ * -------------------------------
+ * Update global object g_gui with information
+ * from compass gauge and other divs
+ *
+ * Invoked by:
+ * . startApp               (gui/compass/js/compass.js)
+ *
+ * Called Sub/Functions: NONE
+ *
+ * Global variables used: 
+ * . g_gui                  (gui/compass/js/compass.js)
+ * 
+ * DOM items affected:
+ * . compass                (gui/compass/main.html) 
+ *
+ * Arguments: NONE
+*/
 function updateGlobal() {
   const dataset = document.getElementById("compass").dataset;             // Shortcut for RadialGauge options
   
@@ -50,9 +79,28 @@ function updateGlobal() {
 } 
 
 
-// This function moves all div in their position based on 
-// compass size
-// Called on startup and on every window resize
+
+/*------------------------------------------------------
+ * Function: updateGlobal
+ * -------------------------------
+ * Moves all DIVs in proper position based on 
+ * compass coordinates.
+ *
+ * Invoked by:
+ * . startApp               (gui/compass/js/ompass.js)
+ *
+ * Called Sub/Functions: NONE
+ *
+ * Global variables used: 
+ * . g_gui                  (gui/compass/js/ompass.js)
+ *
+ * DOM items affected:
+ * . degree                 (gui/compass/main.html) 
+ * . presetNew              (gui/compass/main.html) 
+ * . presetCur              (gui/compass/main.html) 
+ *
+ * Arguments: NONE
+*/
 function setOverlayDiv() {
   let degree = document.getElementById("degree");
   let presetNew = document.getElementById("preset_new");
@@ -69,11 +117,31 @@ function setOverlayDiv() {
   //position current preset box (usually hidden)
   presetCur.style.left = parseInt(g_gui.compassCenterX - presetCur.clientWidth/2 - presetCur.clientLeft ) + "px"; 
   presetCur.style.top = degree.offsetTop + presetCur.clientHeight*1.2 + "px";
-
 }
 
 
 
+/*------------------------------------------------------
+ * Function: updateCompass
+ * -------------------------------
+ * Moves all DIVs in proper position based on 
+ * compass coordinates.
+ *
+ * Invoked by:
+ * . startApp               (gui/compass/js/compass.js)
+ *
+ * Called Sub/Functions: NONE
+ *
+ * Global variables used: 
+ * . g_gui                  (gui/compass/js/ompass.js)
+ *
+ * DOM items affected:
+ * . degree                 (gui/compass/main.html) 
+ * . presetNew              (gui/compass/main.html) 
+ * . presetCur              (gui/compass/main.html) 
+ *
+ * Arguments: NONE
+*/
 function updateCompass(az){
   let degree = document.getElementById("degree"); 	
   let compass = document.getElementById("compass");
@@ -83,25 +151,28 @@ function updateCompass(az){
   
   // Update degree box
   degree.innerHTML = az.toString().padStart(3,"0");
-
-  // check if preset has been reached
-  if ( (g_gui.prevAz != null)    &&  
-       (g_gui.presetCur != null) && 
-       ( 
-         (g_gui.prevAz <= g_gui.presetCur && az >= g_gui.presetCur) || 
-         (g_gui.prevAz >= g_gui.presetCur && az <= g_gui.presetCur) 
-       )
-     ) {
-    g_gui.presetCur = null;
-    managePresetGUI();
-  }
-		  
-  // update previous value
-  g_gui.prevAz = az;
 }
 
 
 
+/*------------------------------------------------------
+ * Function: evalPresetAngle
+ * -------------------------------
+ * Compute angle for current mouse position
+ *
+ * Invoked by:
+ * . compassMouseMove       (gui/compass/js/events.js)
+ *
+ * Called Sub/Functions: NONE
+ *
+ * Global variables used: 
+ * . g_gui                  (gui/compass/js/ompass.js)
+ *
+ *  DOM items affected: NONE
+ * 
+ * Arguments: 
+ * . x,y: current mouse coordinates relative to compass canvas object
+*/
 function evalPresetAngle(x,y) {
   let dist = 0;            // pointer's distance from compass center
   let angle = 0;           // pointer azimuth
@@ -127,6 +198,31 @@ function evalPresetAngle(x,y) {
   }
 }
 
+
+
+/*------------------------------------------------------
+ * Function: managePresetGUI
+ * -------------------------------
+ * Manage preset indicators boxes and compass highligths
+ *
+ * Invoked by:
+ * . compassMouseMove       (gui/compass/js/events.js)
+ * . compassLeftClick       (gui/compass/js/events.js)
+ * . compassRightClick      (gui/compass/js/events.js)
+ * . electronAPI.onTarget   (gui/compass/js/preload.js)
+ *
+ * Called Sub/Functions: NONE
+ *
+ * Global variables used: 
+ * . g_gui                  (gui/compass/js/compass.js) 
+ *
+ * DOM items affected:
+ * . compass                (gui/compass/main.html)
+ * . preset_new             (gui/compass/main.html)
+ * . preset_cur             (gui/compass/main.html)
+ * 
+ * Arguments: NONE
+*/
 function managePresetGUI() {
   const dataset = document.getElementById("compass").dataset;     // compass RadialGauge dataset shortcut
   let presetNew = document.getElementById("preset_new");          // preset_new box shortcut
@@ -144,7 +240,7 @@ function managePresetGUI() {
   
   // New preset compass indicator and boxes
   if (g_gui.presetNew != null) {
-	highlight += "{\"from\": " + (g_gui.presetNew-0.75) + ", \"to\": " + (g_gui.presetNew + 0.75 ) +", \"color\": \"rgba(200, 50, 50, .75)\"}"; 
+    highlight += "{\"from\": " + (g_gui.presetNew-0.75) + ", \"to\": " + (g_gui.presetNew + 0.75 ) +", \"color\": \"rgba(200, 50, 50, .75)\"}"; 
     presetNew.innerHTML = g_gui.presetNew.toString().padStart(3,"0");
     presetNew.style.visibility = "visible";
   } else {
@@ -154,75 +250,36 @@ function managePresetGUI() {
   // Remove last comma in highlight property, if any
   highlight = highlight.replace(/},$/,'}');
   dataset.highlights="[" + highlight + "]";
-
 }	
 
 
-/* -------------------------- */
-/* Event Handlers (from html) */
-/* -------------------------- */
 
-function compassMouseMove (mouseX,mouseY){
-  if (g_gui.connected) {
-    evalPresetAngle (mouseX,mouseY);
-    managePresetGUI();
-  }
-}
-
-
-function compassLeftClick() {
-  if (g_gui.connected) {
-    if (g_gui.presetNew != null) { g_gui.presetCur = g_gui.presetNew; }
-    managePresetGUI();
-    window.electronAPI.setTarget(g_gui.presetCur);
-  }
-}
-
-
-
-function compassRightClick() {
-  if (g_gui.connected) {
-    g_gui.presetCur = null;
-    g_gui.presetNew = null;
-    managePresetGUI();
-  }
-}
-
-
-
-/* -------------------------- */
-/* Event Handlers (from node) */
-/* -------------------------- */
-window.electronAPI.onConnected(() => {
-  g_gui.connected = true;
-  document.getElementById("degree").classList.remove('off');
-  document.getElementById("degree").classList.add('on');
-});
-
-window.electronAPI.onDisconnect(() => {
-  g_gui.connected = false;
-  document.getElementById("degree").classList.remove('on');
-  document.getElementById("degree").classList.add('off');
-});
-
-
-
-window.electronAPI.onAzimuth((_event,value) => {updateCompass(value);});
-
-vwindow.electronAPI.onTarget((_event,value) => {
-  managePresetGUI();
-});
-
-
-
-// invoked ad application startup (i.e. page load)
+/*------------------------------------------------------
+ * Function: startApp
+ * -------------------------------
+ * Start application when page has been loaded
+ *
+ * Invoked by:
+ * . page load event        (gui/compass/main.html)
+ *
+ * Called Sub/Functions: 
+ * . addListeners           (gui/compass/js/events.js)
+ * . updateGlobal           (gui/compass/js/compass.js)
+ * . setOverlayDiv          (gui/compass/js/compass.js)
+ * 
+ * Global variables used: NONE
+ *
+ * DOM items affected: NONE
+ * 
+ * Arguments: NONE
+*/
 function startApp () {
+  // Add event listeners
+  addListeners();
+
   // Update global variables
   updateGlobal();
   
   // Position degree boxes in proper position
-  setOverlayDiv();
-  
+  setOverlayDiv();  
 }
-	 
-	 
