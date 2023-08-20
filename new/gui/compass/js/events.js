@@ -89,8 +89,8 @@ function compassMouseMove (mouseX,mouseY){
  * Arguments: NONE
 */
 function compassLeftClick() {
-  if (g_gui.connected) {
-    if (g_gui.presetNew != null) { g_gui.presetCur = g_gui.presetNew; }
+  if (g_gui.connected && g_gui.presetNew != null) { 
+    g_gui.presetCur = g_gui.presetNew; 
     managePresetGUI();
     window.electronAPI.setTarget(g_gui.presetCur);
   }

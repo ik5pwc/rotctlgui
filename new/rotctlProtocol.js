@@ -179,6 +179,37 @@ function stopMotor() {
 
 
 
+/*------------------------------------------------------
+ * Function: turn
+ * -------------------------------
+ * rotate motor CW or CCW
+ *
+ * Invoked by:
+ * . startup                (main.js)
+ *
+ * Called Sub/Functions: 
+ * . sendCommand            (rotctlProtocol.js)
+ *
+ * Global variables used: NONE
+ *
+ * Arguments: 
+ * . direction: can be CW or CCW 
+*/
+function turn(direction) {
+  switch (direction) {
+    case "CW":
+      console.log("Turning rotor CW");
+      sendCommand("+M 16 0");
+      break;
+    case "CCW":
+    console.log("Turning rotor CW");
+    sendCommand("+M 16 0");
+    break;
+  }
+}
+
+
+
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Module (private) functions                                         /*
 /* --------------------------------------------------------------------------------------------------------- */

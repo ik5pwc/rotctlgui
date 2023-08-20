@@ -11,13 +11,13 @@
   </head>
 
   <body onload="startApp();">
-    <div>
-	    <span id="header">
-	    </span>
-    </div>
 
     <div class="container">
-      <div class="compass">
+      <div id="title" class="title">ROTCTLD 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16</div>
+      <div class="containerStop" id="stopNorh">
+        <div class="stop">STOP</div>
+      </div>
+      <div id="compassContainer" class="compass">
         <canvas 
           id                             = "compass"
           data-type                      = "radial-gauge"
@@ -62,6 +62,11 @@
         >
         </canvas>
       </div>
+      <div class="containerStop" id="stopSouth">
+        <div class="stop" >STOP</div>
+      </div>
+      <div id="button_cw"  class="degree off">CW</div>
+      <div id="button_ccw" class="degree off">CCW</div>
       <div id="degree" class="degree off">000</div>
       <div id="preset_new" class="preset_new">n/d</div>
       <div id="preset_cur" class="preset_cur">n/d</div>

@@ -105,18 +105,25 @@ function setOverlayDiv() {
   let degree = document.getElementById("degree");
   let presetNew = document.getElementById("preset_new");
   let presetCur = document.getElementById("preset_cur");
+  let title     = document.getElementById("title");
+  let compass   = document.getElementById("compass");
+  let compassContainer = document.getElementById("compassContainer");
 
   // Position azimuth box
-  degree.style.top = parseInt(g_gui.compassCenterY + 1.1*g_gui.needleStart) + "px";
+  degree.style.top = parseInt(g_gui.compassCenterY + 1.1*g_gui.needleStart + compassContainer.offsetTop) + "px";
   degree.style.left = parseInt(g_gui.compassCenterX - degree.clientWidth/2 - degree.clientLeft ) + "px";
   
   //position new preset box (usually hidden)
   presetNew.style.left = parseInt(g_gui.compassCenterX - presetNew.clientWidth/2 - presetNew.clientLeft ) + "px"; 
-  presetNew.style.top = parseInt(g_gui.compassCenterY/2) + "px";
+  presetNew.style.top = parseInt(g_gui.compassCenterY/2 + compassContainer.offsetTop) + "px";
 
   //position current preset box (usually hidden)
   presetCur.style.left = parseInt(g_gui.compassCenterX - presetCur.clientWidth/2 - presetCur.clientLeft ) + "px"; 
   presetCur.style.top = degree.offsetTop + presetCur.clientHeight*1.2 + "px";
+
+  // Title box
+  title.style.width = compass.style.width;
+
 }
 
 
