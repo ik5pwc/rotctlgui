@@ -12,6 +12,7 @@
 const Net = require('node:net'); 
 const { globalEmitter } = require('./node_events.js');
 const { send } = require('node:process');
+const { stat } = require('node:fs');
 
 
 
@@ -22,10 +23,10 @@ const { send } = require('node:process');
 const client = new Net.Socket();      // TCP Socket
 
 const rotctld = {                     // ROTCTLD network information 
-  host     : "civiwks002.local",      // FQDN or ip address - default: localhost
-  port     : 5002,                    // ROTCTLD listen port - default: 4533
-  polling  : 100,                     // Polling rate for position (ms) - default 500 ms
-  minSkew  : 3,                       // minimum difference to start rotation   
+  host     : "" ,                     // FQDN or ip address - default: localhost
+  port     : 0,                       // ROTCTLD listen port - default: 4533
+  polling  : 10000,                   // Polling rate for position (ms) - default 500 ms
+  minSkew  : 30,                      // minimum difference to start rotation   
   southStop: true                     // Rotor has south stop or north stop. Used only if point to target has to be
                                       // managed by GUI (i.e. this app will send "move left/right" to rotator, 
                                       // check current position and send stop command when is on target).
@@ -41,6 +42,7 @@ const status = {            // Manage rotctl protocol and store rotor configurat
   targetSouth : null,          // target when south stop (-180 ... 180)
   azimuthSouth: null,          // current  azimut when south stop (-180 ... 180)
   motor       : "S",           // Motor status
+  connected   : false,         // turn to true after verify connection
   errors      : 0              // Communication error
 };
 
@@ -232,7 +234,7 @@ function turn(direction) {
  * Arguments: NONE
 */
 function getAzimuth () {
-  sendCommand("+p");
+  if (status.connected) {sendCommand("+p");}
   setTimeout(()=>{getAzimuth()},rotctld.polling);
 }
 
@@ -252,7 +254,7 @@ function getAzimuth () {
  *
  * Global variables used: 
  * . status                 (rotctlProtocol.js)
- * . Client                 (rotctlProtocol.js)
+ * . client                 (rotctlProtocol.js)
  * 
  * Arguments: 
  * . cmd: command to send
@@ -319,6 +321,7 @@ function replyCapabilities(buffer) {
     console.log("Rotator model: " + model[1]);
     globalEmitter.emit('connected');    // Inform GUI connection is successfull
     getAzimuth();                       // Start polling
+    status.connected = true;
 
     // Valid response detected
     return true;
@@ -430,4 +433,9 @@ function hClosed(){
   
   // Retry connection
   setTimeout(()=>{connect()},2000);
+
+  // clear RX buffer
+  status.rxBuffer = "";
+  status.sent=[];
+  status.connected = false;
 }

@@ -75,14 +75,14 @@ function compassMouseMove (mouseX,mouseY){
  * Invoked on left click on compass DIV
  *
  * Invoked by:
- * . event Listenter            (gui/compass/js/events.js)
+ * . event Listenter                 (gui/compass/js/events.js)
  *
  * Called Sub/Functions: 
- * . managePresetGUI            (gui/compass/js/compass.js)
- * . electronAPI.setTarget      (gui/compass/js/preload.js)
+ * . managePresetGUI                 (gui/compass/js/compass.js)
+ * . electronAPI.render_setTarget    (gui/compass/js/preload.js)
  *
  * Global variables used:
- * . g_gui                      (gui/compass/js/compass.js)
+ * . g_gui                           (gui/compass/js/compass.js)
  *
  * Arguments: NONE
 */
@@ -90,7 +90,7 @@ function compassLeftClick() {
   if (g_gui.connected && g_gui.presetNew != null) { 
     g_gui.presetCur = g_gui.presetNew; 
     managePresetGUI();
-    window.electronAPI.setTarget(g_gui.presetCur);
+    window.electronAPI.render_setTarget(g_gui.presetCur);
   }
 }
   
@@ -102,14 +102,14 @@ function compassLeftClick() {
  * Invoked on right click on compass DIV
  *
  * Invoked by:
- * . event Listenter            (gui/compass/js/events.js)
+ * . event Listenter                   (gui/compass/js/events.js)
  *
  * Called Sub/Functions: 
- * . managePresetGUI            (gui/compass/js/compass.js)
- * . electronAPI.stopMotor      (gui/compass/js/preload.js)
+ * . managePresetGUI                   (gui/compass/js/compass.js)
+ * . electronAPI.render_stopMotor      (gui/compass/js/preload.js)
  *
  * Global variables used:
- * . g_gui                      (gui/compass/js/compass.js)
+ * . g_gui                              (gui/compass/js/compass.js)
  *
  * Arguments: NONE
 */
@@ -117,7 +117,7 @@ function compassRightClick() {
   if (g_gui.connected) {
     g_gui.presetCur = null;
     g_gui.presetNew = null;
-    window.electronAPI.stopMotor();
+    window.electronAPI.render_stopMotor();
     managePresetGUI();
   }
 }
@@ -130,10 +130,10 @@ function compassRightClick() {
  * Invoked when CW or CCW button is being released
  *
  * Invoked by:
- * . event Listenter            (gui/compass/main.html)
+ * . event Listenter                   (gui/compass/main.html)
  *
  * Called Sub/Functions: 
- * . electronAPI.stopMotor      (gui/compass/js/preload.js)
+ * . electronAPI.render_stopMotor      (gui/compass/js/preload.js)
  *
  * Global variables used: NONE
  *
@@ -142,7 +142,7 @@ function compassRightClick() {
 */
 function releaseButton(obj){ 
   obj.classList.remove('push');
-  window.electronAPI.stopMotor();
+  window.electronAPI.render_stopMotor();
 }
 
 
@@ -156,7 +156,7 @@ function releaseButton(obj){
  * . event Listenter            (gui/compass/main.html)
  *
  * Called Sub/Functions: 
- * . electronAPI.turn           (gui/compass/js/preload.js)
+ * . electronAPI.render_turn    (gui/compass/js/preload.js)
  *
  * Global variables used: 
  * . g_gui                      (gui/compass/js/compass.js)
@@ -167,7 +167,7 @@ function releaseButton(obj){
 function pushButton(obj){
   if (g_gui.connected) {
     obj.classList.add('push');
-    window.electronAPI.turn(obj.innerHTML) 
+    window.electronAPI.render_turn(obj.innerHTML) 
   }
 }
 
@@ -263,4 +263,9 @@ window.electronAPI.onTarget((_event) => {
   managePresetGUI();
 });
   
-  
+  window.electronAPI.setTitle((_event,title) =>{
+alert(title);
+
+
+
+  })

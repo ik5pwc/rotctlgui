@@ -17,9 +17,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onDisconnect: (callback) => ipcRenderer.on('disconnected',(callback)),
   onAzimuth:    (callback) => ipcRenderer.on('azimuth',(callback)),
   onTarget:     (callback) => ipcRenderer.on('target',(callback)),
-  setTarget:    (az)       => ipcRenderer.send('setTarget',az),
-  stopMotor:    ()         => ipcRenderer.send('stopMotor'),
-  turn:         (dir)      => ipcRenderer.send('turn',dir)
+  setTitle:     (callback) => ipcRenderer.on('setTitle',(callback)),
+  render_setTarget:    (az)       => ipcRenderer.send('main_setTarget',az),
+  render_stopMotor:    ()         => ipcRenderer.send('main_stopMotor'),
+  render_turn:         (dir)      => ipcRenderer.send('main_turn',dir)
 })
  
  
