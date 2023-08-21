@@ -51,6 +51,7 @@ const status = {            // Manage rotctl protocol and store rotor configurat
 exports.connect      = connect;
 exports.pointTo      = pointTo;
 exports.stopMotor    = stopMotor;
+exports.turn         = turn;
 exports.setAddress   = function (address) {rotctld.host = address;};
 exports.setPort      = function (port)    {rotctld.port = port;};
 exports.setPolling   = function (rate)    {rotctld.polling = rate;};
@@ -202,8 +203,8 @@ function turn(direction) {
       sendCommand("+M 16 0");
       break;
     case "CCW":
-    console.log("Turning rotor CW");
-    sendCommand("+M 16 0");
+    console.log("Turning rotor CCW");
+    sendCommand("+M 8 0");
     break;
   }
 }

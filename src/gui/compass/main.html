@@ -21,8 +21,8 @@
         <canvas 
           id                             = "compass"
           data-type                      = "radial-gauge"
-          data-width                     = "360"
-          data-height                    = "360"
+          data-width                     = "280" 
+          data-height                    = "280"
           data-title                     = ""
           data-start-angle               = "180"
           data-value                     = "0"
@@ -65,8 +65,8 @@
       <div class="containerStop" id="stopSouth">
         <div class="stop" >STOP</div>
       </div>
-      <div id="button_cw"  class="degree off">CW</div>
-      <div id="button_ccw" class="degree off">CCW</div>
+      <div id="button_ccw" class="button" onmousedown="pushButton(this);" onmouseup="releaseButton(this);">CCW</div>
+      <div id="button_cw"  class="button" onmousedown="pushButton(this);" onmouseup="releaseButton(this);">CW</div>
       <div id="degree" class="degree off">000</div>
       <div id="preset_new" class="preset_new">n/d</div>
       <div id="preset_cur" class="preset_cur">n/d</div>

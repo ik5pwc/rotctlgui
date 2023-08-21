@@ -98,6 +98,8 @@ function updateGlobal() {
  * . degree                 (gui/compass/main.html) 
  * . presetNew              (gui/compass/main.html) 
  * . presetCur              (gui/compass/main.html) 
+ * . title                  (gui/compass/main.html)
+ * . compassContainer       (gui/compass/main.html)
  *
  * Arguments: NONE
 */
@@ -108,6 +110,7 @@ function setOverlayDiv() {
   let title     = document.getElementById("title");
   let compass   = document.getElementById("compass");
   let compassContainer = document.getElementById("compassContainer");
+  let cw = document.getElementById("button_cw");
 
   // Position azimuth box
   degree.style.top = parseInt(g_gui.compassCenterY + 1.1*g_gui.needleStart + compassContainer.offsetTop) + "px";
@@ -123,6 +126,7 @@ function setOverlayDiv() {
 
   // Title box
   title.style.width = compass.style.width;
+  cw.style.left = compass.clientWidth - 2*cw.clientWidth + "px";
 
 }
 

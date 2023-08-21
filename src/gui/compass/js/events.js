@@ -29,9 +29,7 @@
 function addListeners() {
   // Compass object
   const compass = document.getElementById("compass");
-
-  // This handler will be executed only once when the cursor
-  // moves over the unordered list
+  
   compass.addEventListener( "mousemove",(event) => {compassMouseMove(event.layerX,event.layerY);}, false,);
   compass.addEventListener( "mouseout",(event) => {compassMouseMove(event.layerX,event.layerY);}, false,);
   compass.addEventListener( "click", () => {compassLeftClick();},false);
@@ -77,7 +75,7 @@ function compassMouseMove (mouseX,mouseY){
  * Invoked on left click on compass DIV
  *
  * Invoked by:
- * . event Lisenter             (gui/compass/js/events.js)
+ * . event Listenter            (gui/compass/js/events.js)
  *
  * Called Sub/Functions: 
  * . managePresetGUI            (gui/compass/js/compass.js)
@@ -104,7 +102,7 @@ function compassLeftClick() {
  * Invoked on right click on compass DIV
  *
  * Invoked by:
- * . event Lisenter             (gui/compass/js/events.js)
+ * . event Listenter            (gui/compass/js/events.js)
  *
  * Called Sub/Functions: 
  * . managePresetGUI            (gui/compass/js/compass.js)
@@ -124,12 +122,60 @@ function compassRightClick() {
   }
 }
   
-  
-  
+ 
+
+/*------------------------------------------------------
+ * Function: releaseButton
+ * -------------------------------
+ * Invoked when CW or CCW button is being released
+ *
+ * Invoked by:
+ * . event Listenter            (gui/compass/main.html)
+ *
+ * Called Sub/Functions: 
+ * . electronAPI.stopMotor      (gui/compass/js/preload.js)
+ *
+ * Global variables used: NONE
+ *
+ * Arguments: 
+ * . obj: is the HTML object triggering the event
+*/
+function releaseButton(obj){ 
+  obj.classList.remove('push');
+  window.electronAPI.stopMotor();
+}
+
+
+
+/*------------------------------------------------------
+ * Function: pushButton
+ * -------------------------------
+ * Invoked when CW or CCW button is being released
+ *
+ * Invoked by:
+ * . event Listenter            (gui/compass/main.html)
+ *
+ * Called Sub/Functions: 
+ * . electronAPI.turn           (gui/compass/js/preload.js)
+ *
+ * Global variables used: 
+ * . g_gui                      (gui/compass/js/compass.js)
+ *
+ * Arguments: 
+ * . obj: is the HTML object triggering the event
+*/
+function pushButton(obj){
+  if (g_gui.connected) {
+    obj.classList.add('push');
+    window.electronAPI.turn(obj.innerHTML) 
+  }
+}
+
+
+
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Event Handlers (from node)                                         /*
 /* --------------------------------------------------------------------------------------------------------- */
-
 
 /*------------------------------------------------------
  * Function: onConnected

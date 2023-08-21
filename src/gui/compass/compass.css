@@ -7,6 +7,10 @@ body {
   background-color: #252625;
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
+
 .container {
   position: absolute;
   top:5px;
@@ -60,7 +64,7 @@ body {
   padding:0.3em;
   z-index:10;
   color:white;
-  font-size: 1.5em;
+  font-size: 1.2em;
   font-weight: bold;
   width:2.5em;
   text-align: center;
@@ -79,7 +83,7 @@ body {
   padding:0.3em;
   z-index:10;
   color:rgba(230, 50, 50, 1);   
-  font-size: 1.3em;
+  font-size: 1em;
   font-weight: bold;
   width:2.5em;
   text-align: center;
@@ -97,9 +101,30 @@ body {
   padding:0.3em;
   z-index:5;
   color:rgb(63, 255, 183);   
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: bold;
   width:2.5em;
   text-align: center;
   visibility: hidden;
 }
+
+.button {
+  border-radius: 6px;
+  font-family: sans-serif;
+  color: white;
+  border: 1px solid white;
+  font-size: 0.9em;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-weight: bold;
+  background: #3e3e3e;
+  vertical-align: middle;
+  display: table-cell;
+  cursor: pointer;
+  overflow: hidden;
+  position:relative;
+  top:-50px;
+}
+
+.push {background-color: #26d126;}
