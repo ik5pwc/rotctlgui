@@ -20,12 +20,16 @@ const createWindow = () => {
     height: 400,
     resizable: false,
     fullscreenable: false,
-    webPreferences: { preload: path.join(__dirname, 'gui/compass/js/preload.js')
+    webPreferences: { preload: path.join(__dirname, 'gui/compass/js/ipc-render-main.js')
     }
   })
   
-  mainWin.loadFile('gui/compass/main.html')
-  mainWin.webContents.on('did-finish-load',() => {rotctlProtocol.connect(); mainWin.webContents.send('setTitle',"pppp");});
+  mainWin.loadFile('gui/compass/compass.html')
+  mainWin.webContents.on('did-finish-load',() => {
+    rotctlProtocol.connect(); 
+    mainWin.webContents.send('main_tx_title',"pppp   pppp oooo ll k h kjhk jhkjh ".substring(0,20));
+    mainWin.webContents.send('main_tx_setStop',"S");
+  });
 }
 
 app.whenReady().then(() => { createWindow()});
@@ -36,13 +40,15 @@ app.whenReady().then(() => { createWindow()});
 /* -------------------------- */
 /*       Event Receivers      */
 /* -------------------------- */
-globalEmitter.on('connected', ()      => {mainWin.webContents.send('connected');    });
-globalEmitter.on('disconnected', ()   => {mainWin.webContents.send('disconnected'); });
-globalEmitter.on('azimuth', (value)   => {mainWin.webContents.send('azimuth',value);});
-globalEmitter.on('onTarget',(value)   => {mainWin.webContents.send('target',value);});
-ipcMain.on('main_setTarget',(event, value) => {rotctlProtocol.pointTo(value);});
-ipcMain.on('main_turn',(event,value)       => {rotctlProtocol.turn(value);});
-ipcMain.on('main_stopMotor',(event)        => {rotctlProtocol.stopMotor();});
+/* Route Events from rotctlProtocol to main window */
+globalEmitter.on('rotctlProtocol_tx_conn', (value)    => {mainWin.webContents.send('main_tx_conn',value); });
+globalEmitter.on('rotctlProtocol_tx_azimuth', (value) => {mainWin.webContents.send('main_tx_azimuth',value);});
+globalEmitter.on('rotctlProtocol_tx_onTarget',(value) => {mainWin.webContents.send('main_tx_target',value);});
+
+
+ipcMain.on('main_rx_setTarget',(event, value) => {rotctlProtocol.setTarget(value);});
+ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});
+ipcMain.on('main_rx_stopMotor',(event)        => {rotctlProtocol.stop();});
 
 
 

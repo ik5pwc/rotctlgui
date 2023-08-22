@@ -51,8 +51,8 @@ const status = {            // Manage rotctl protocol and store rotor configurat
 /* --------------------------------------------------------------------------------------------------------- */
 
 exports.connect      = connect;
-exports.pointTo      = pointTo;
-exports.stopMotor    = stopMotor;
+exports.setTarget    = setTarget;
+exports.stop         = stop;
 exports.turn         = turn;
 exports.setAddress   = function (address) {rotctld.host = address;};
 exports.setPort      = function (port)    {rotctld.port = port;};
@@ -68,9 +68,9 @@ exports.getSouthStop = function () {return rotctld.southStop;};
 
 
 /*------------------------------------------------------
- * Function: pointTo
+ * Function: setTarget
  * -------------------------------
- * Point antenna to specified azimutb
+ * Point antenna to specified azimuth
  *
  * Invoked by:
  * . event emitter          (main.js)
@@ -86,7 +86,7 @@ exports.getSouthStop = function () {return rotctld.southStop;};
  * Arguments:
  * . target: pointer to configuration structure managing all configuration states
 */
-function pointTo(target) {
+function setTarget(target) {
   console.log("Pointing to " + target);
   status.target = parseInt(target);
 
@@ -94,7 +94,7 @@ function pointTo(target) {
   // check target > minSkew
   if (Math.abs(status.azimuth - status.target) < rotctld.minSkew) {
     // target near to current azimuth, report as done
-    globalEmitter.emit('onTarget');    
+    globalEmitter.emit('rotctlProtocol_tx_onTarget');    
     status.motor = "S";
 
   } else {
@@ -159,7 +159,7 @@ function connect() {
 
 
 /*------------------------------------------------------
- * Function: stopMotor
+ * Function: stop
  * -------------------------------
  * Immediatly stop motor 
  *
@@ -173,7 +173,7 @@ function connect() {
  *
  * Arguments: NONE
 */
-function stopMotor() {
+function stop() {
   console.log("Stopping motor");
   
   // Generic connection parameters
@@ -248,7 +248,7 @@ function getAzimuth () {
  * Invoked by:
  * . hEstablished           (rotctlProtocol.js)
  * . getAzimuth             (rotctlProtocol.js)
- * . pointTo                (rotctlProtocol.js)
+ * . setTarget              (rotctlProtocol.js)
  *
  * Called Sub/Functions: NONE
  *
@@ -306,6 +306,22 @@ function checkReply(reply) {
 }
 
 
+
+/*------------------------------------------------------
+ * Function: replySetPos
+ * -------------------------------
+ * Evaluate reply when command sent was "+P"
+ *
+ * Invoked by:
+ * . checkReply             (rotctlProtocol.js)
+ *
+ * Called Sub/Functions: NONE 
+ * 
+ * Global variables used: NONE
+ * 
+ * Arguments: 
+ * . buffer: string containing reply to be evaluated
+*/
 function replySetPos(buffer) {
   let replySetPos = buffer.match('set_pos: (-?[0-9]{1,})\.[0-9]{1,} 0.0');
   if (replySetPos != undefined) {return true;} else {return false;}
@@ -313,14 +329,31 @@ function replySetPos(buffer) {
 
 
 
+/*------------------------------------------------------
+ * Function: replyCapabilities
+ * -------------------------------
+ * Evaluate reply when command sent was "1"
+ *
+ * Invoked by:
+ * . checkReply             (rotctlProtocol.js)
+ *
+ * Called Sub/Functions: 
+ * . getAzimuth             (rotctlProtocol.js) 
+ * . globalEmitter          (node_events.js)
+ * 
+ * Global variables used: NONE
+ * 
+ * Arguments: 
+ * . buffer: string containing reply to be evaluated
+*/
 function replyCapabilities(buffer) {
   // Message format
   let model = buffer.match("Model name:\t\t(.*)\n");       
   
   if (model != undefined) { 
     console.log("Rotator model: " + model[1]);
-    globalEmitter.emit('connected');    // Inform GUI connection is successfull
-    getAzimuth();                       // Start polling
+    globalEmitter.emit('rotctlProtocol_tx_conn',true);    // Inform GUI connection is successfull
+    getAzimuth();                                         // Start polling
     status.connected = true;
 
     // Valid response detected
@@ -331,6 +364,26 @@ function replyCapabilities(buffer) {
 }
 
 
+
+/*------------------------------------------------------
+ * Function: replyGetPos
+ * -------------------------------
+ * Evaluate reply when command sent was "+p"
+ *
+ * Invoked by:
+ * . checkReply             (rotctlProtocol.js)
+ *
+ * Called Sub/Functions: 
+ * . getAzimuth             (rotctlProtocol.js) 
+ * . sendCommand            (rotctlProtocol.js)
+ * . globalEmitter          (node_events.js)
+ * 
+ * Global variables used: 
+ * . status                 (rotctlProtocol.js)
+ * 
+ * Arguments: 
+ * . buffer: string containing reply to be evaluated
+*/
 function replyGetPos(buffer){
   // Message format
   let replyPos = buffer.match('get_pos:\nAzimuth: (-?[0-9]{1,})\.[0-9]{2}\nElevation: [0-9]{1,}\.[0-9]{2}\n');
@@ -339,7 +392,7 @@ function replyGetPos(buffer){
     // Save value and send event to main application
     status.azimuth = replyPos[1];
     if (rotctld.southStop === true && status.azimuth > 180) {status.azimuthSouth = status.azimuth - 360;} else {status.azimuthSouth = status.azimuth;} 
-    globalEmitter.emit('azimuth',status.azimuth);
+    globalEmitter.emit('rotctlProtocol_tx_azimuth',status.azimuth);
 
     // Check for target or  errors
     if ( (status.motor != "S" ) &&
@@ -359,7 +412,7 @@ function replyGetPos(buffer){
         sendCommand("+S");
         status.target = null;
         status.motor = "S";
-        globalEmitter.emit('onTarget');
+        globalEmitter.emit('rotctlProtocol_tx_onTarget');
     }
 
     // Valid response detected
@@ -391,18 +444,19 @@ function manageProtocolError() {
 /* --------------------------------------------------------------------------------------------------------- */
 client.on('error',    () => {hClosed()});
 client.on('end',      () => {hClosed()});
-client.on("connect",  () => {hEstablished()});
-client.on('data', (data) => {hData(data);});
+
 
 /* Connection event handlers */
-function hEstablished() {
+client.on("connect",  () => {
   console.log("Connected to " + rotctld.host + ": " + rotctld.port + " . Verify rotctld instance..")
+
   // Send basic command to verify we're connected to a rotctld instance
   sendCommand("1");
-}
+});
 
 
-function hData (data) {
+
+client.on('data',(data) => {
   // Append data to global buffer
   for (let i=0; i<data.length;i++) {
     status.rxBuffer += data.toString()[i];
@@ -421,7 +475,7 @@ function hData (data) {
       }
     }
   }  
-}
+});
 
 
 
@@ -429,7 +483,7 @@ function hClosed(){
   console.log("Connection to " + rotctld.host + ":" + rotctld.port + " closed. Retry in 2 sec.")
   
   // Notify GUI about disconnect
-  globalEmitter.emit('disconnected');
+  globalEmitter.emit('rotctlProtocol_tx_conn',false);
   
   // Retry connection
   setTimeout(()=>{connect()},2000);

@@ -139,17 +139,18 @@ function setOverlayDiv() {
  * compass coordinates.
  *
  * Invoked by:
- * . startApp               (gui/compass/js/compass.js)
+ * . startApp                                (gui/compass/js/compass.js)
+ * . window.electronAPI.compass_rx_azimuth   (gui/compass/js/ipc-renderer-main.js)
  *
  * Called Sub/Functions: NONE
  *
  * Global variables used: 
- * . g_gui                  (gui/compass/js/ompass.js)
+ * . g_gui                                   (gui/compass/js/ompass.js)
  *
  * DOM items affected:
- * . degree                 (gui/compass/main.html) 
- * . presetNew              (gui/compass/main.html) 
- * . presetCur              (gui/compass/main.html) 
+ * . degree                                  (gui/compass/main.html) 
+ * . presetNew                               (gui/compass/main.html) 
+ * . presetCur                               (gui/compass/main.html) 
  *
  * Arguments: NONE
 */
@@ -217,20 +218,20 @@ function evalPresetAngle(x,y) {
  * Manage preset indicators boxes and compass highligths
  *
  * Invoked by:
- * . compassMouseMove       (gui/compass/js/events.js)
- * . compassLeftClick       (gui/compass/js/events.js)
- * . compassRightClick      (gui/compass/js/events.js)
- * . electronAPI.onTarget   (gui/compass/js/preload.js)
+ * . compassMouseMove                   (gui/compass/js/events.js)
+ * . compassLeftClick                   (gui/compass/js/events.js)
+ * . compassRightClick                  (gui/compass/js/events.js)
+ * . electronAPI.compass_tx_setTarget   (gui/compass/js/ipc-render-main.js)
  *
  * Called Sub/Functions: NONE
  *
  * Global variables used: 
- * . g_gui                  (gui/compass/js/compass.js) 
+ * . g_gui                              (gui/compass/js/compass.js) 
  *
  * DOM items affected:
- * . compass                (gui/compass/main.html)
- * . preset_new             (gui/compass/main.html)
- * . preset_cur             (gui/compass/main.html)
+ * . compass                            (gui/compass/main.html)
+ * . preset_new                         (gui/compass/main.html)
+ * . preset_cur                         (gui/compass/main.html)
  * 
  * Arguments: NONE
 */
