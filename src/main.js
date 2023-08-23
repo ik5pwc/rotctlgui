@@ -3,22 +3,33 @@ const { ipcMain }            = require('electron');
 const { globalEmitter }      = require('./node_events.js');
 const path                   = require('path')
 const rotctlProtocol = require('./rotctlProtocol.js');
+const configFile     = require('./configFile.js');
+
 
 let mainWin;
  
 
-rotctlProtocol.setAddress("civiwks002.local");
-rotctlProtocol.setPolling(300);
-rotctlProtocol.setPort(5002);
+
+let configJSON = configFile.readConfig(app.getPath('appData')+"/rotctlGUI");
+rotctlProtocol.setAddress(configJSON.address);
+rotctlProtocol.setPolling(configJSON.polling);
+rotctlProtocol.setPort(configJSON.port);
 rotctlProtocol.setSouthStop(true);
 rotctlProtocol.setminSkew(5);
 
+
+//TODO: protocol errors
+// TODO: logging avanzato
+// TODO: command line
+//TODO config window
+//TODO help (punta su github)
 
 const createWindow = () => {
   mainWin = new BrowserWindow({
     width: 320,
     height: 400,
     resizable: false,
+    autoHideMenuBar: true,
     fullscreenable: false,
     webPreferences: { preload: path.join(__dirname, 'gui/compass/js/ipc-render-main.js')
     }
@@ -34,8 +45,18 @@ const createWindow = () => {
 
 app.whenReady().then(() => { createWindow()});
 
+/*
+console.log(app.getPath('appData') + "/rotctlgui/default.json");
+
+if (!fs.existsSync(app.getPath('appData') + "/rotctlGUI")) {fs.mkdirSync(app.getPath('appData') + "/rotctlGUI");};
 
 
+
+
+let rawdata = fs.readFileSync('student.json');
+let student = JSON.parse(rawdata);
+console.log(student);
+*/
 
 /* -------------------------- */
 /*       Event Receivers      */

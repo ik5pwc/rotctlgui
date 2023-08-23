@@ -272,7 +272,7 @@ function managePresetGUI() {
  * Start application when page has been loaded
  *
  * Invoked by:
- * . page load event        (gui/compass/main.html)
+ * . page load event        (gui/compass/compass.html)
  *
  * Called Sub/Functions: 
  * . addListeners           (gui/compass/js/events.js)

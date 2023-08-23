@@ -11,8 +11,6 @@
 /* --------------------- Required modules --------------------- */
 const Net = require('node:net'); 
 const { globalEmitter } = require('./node_events.js');
-const { send } = require('node:process');
-const { stat } = require('node:fs');
 
 
 
@@ -27,11 +25,12 @@ const rotctld = {                     // ROTCTLD network information
   port     : 0,                       // ROTCTLD listen port - default: 4533
   polling  : 10000,                   // Polling rate for position (ms) - default 500 ms
   minSkew  : 30,                      // minimum difference to start rotation   
-  southStop: true                     // Rotor has south stop or north stop. Used only if point to target has to be
-                                      // managed by GUI (i.e. this app will send "move left/right" to rotator, 
-                                      // check current position and send stop command when is on target).
-                                      // If null, then moving to target will be performed by rotctl "P" command
-                                      // (i.e. is rotctld to determine if motor has to be moved CW or CCW)   
+  southStop: true,                    // Rotator has south stop or north stop. 
+  moveTo   : false                    // Rotator support "P" command.  i.e. Rotator support a "point to " manage hitself
+                                      // If true, than rotctld will simply tell to Rotator "move to XXX degree" the
+                                      // rotator will exactly move to required destination
+                                      // If false, then rotctlGUI will turn motor CW or CCW and stop when it reach required
+                                      // destination. Leave it to false in doubt.   
 };
 
 const status = {            // Manage rotctl protocol and store rotor configuration
@@ -59,11 +58,6 @@ exports.setPort      = function (port)    {rotctld.port = port;};
 exports.setPolling   = function (rate)    {rotctld.polling = rate;};
 exports.setminSkew   = function (skew)    {rotctld.minSkew = skew;};
 exports.setSouthStop = function (stop)    {rotctld.southStop = stop;};
-exports.getAddress   = function () {return rotctld.host;};
-exports.getPort      = function () {return rotctld.port ;};
-exports.getPolling   = function () {return rotctld.polling;};
-exports.getminSkew   = function () {return rotctld.minSkew;};
-exports.getSouthStop = function () {return rotctld.southStop;};
 
 
 
