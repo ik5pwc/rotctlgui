@@ -58,6 +58,7 @@ exports.setPort      = function (port)    {rotctld.port = port;};
 exports.setPolling   = function (rate)    {rotctld.polling = rate;};
 exports.setminSkew   = function (skew)    {rotctld.minSkew = skew;};
 exports.setSouthStop = function (stop)    {rotctld.southStop = stop;};
+exports.setMoveTo    = function (moveTo)  {rotctld.moveTo = moveTo;};
 
 
 

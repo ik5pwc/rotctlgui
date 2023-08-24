@@ -9,15 +9,21 @@
 */
 
 /* --------------------- Required modules --------------------- */
-//const { globalEmitter } = require('./node_events.js');
 const fs = require('fs');
 
+
+/* --------------------------------------------------------------------------------------------------------- */
+/*                                              Global objects                                               /*
+/* --------------------------------------------------------------------------------------------------------- */
+
+// Below the default values for all parameters
 const defaultPort            = 4533;
 const defaultPolling         = 500;
 const defaultMaxDegreeError  = 5;
 const defaultStop            = "S";
 const defaultMoveToSupported = "N";
 
+// Here is the corresponding JSON for default config
 const defaultCfg ="{\n"
                  +" \"name\": \"Rotator 1\",\n"
                  +" \"address\": \"localhost\",\n"
@@ -28,29 +34,39 @@ const defaultCfg ="{\n"
                  +" \"move_to_supported\": \"" + defaultMoveToSupported + "\" \n"
                  +"}";
 
+// Store configuration JSON
+let configJSON= JSON.parse(defaultCfg);
+
+/* --------------------------------------------------------------------------------------------------------- */
+/*                                            Exported Functions                                             /*
+/* --------------------------------------------------------------------------------------------------------- */
 
 exports.readConfig = readConfig;
+exports.getName          = function () {return configJSON.name;};
+exports.getAddress       = function () {return configJSON.address;};
+exports.getPort          = function () {return configJSON.port;};
+exports.getPolling       = function () {return configJSON.polling;};
+exports.getminSkew       = function () {return configJSON.max_degree_error;};
+exports.getStop          = function () {return configJSON.stop;};
+exports.getMoveSupported = function () {return configJSON.move_to_supported;};
+
 
 function readConfig(dir, name ='default.json' ) {
   let fullConfigFilePath = dir + "/" + name;                  //full path to file
-  let config;
 
   // Try to read configuration file
   try {   
     // parse configuration file
-    config = JSON.parse(fs.readFileSync(fullConfigFilePath, 'utf8')); 
+    configJSON = JSON.parse(fs.readFileSync(fullConfigFilePath, 'utf8')); 
     console.log("Reading configuration file " + fullConfigFilePath);
     validateConfig(config);
   } catch {
     console.error(fullConfigFilePath + " doesn't exist or is not a properly configured JSON file, loading default values...");
-    config = JSON.parse(defaultCfg);
+    configJSON = JSON.parse(defaultCfg);
   }
-  
-  return config;
 }
 
 function validateConfig (json) {
-
   
   // Check for valid port number
   if ( ! (!isNaN(json.port) && json.port >1 &&  json.port < 65535)) {

@@ -9,13 +9,16 @@ const configFile     = require('./configFile.js');
 let mainWin;
  
 
+// Read configuration file
+configFile.readConfig(app.getPath('appData')+"/rotctlGUI");
 
-let configJSON = configFile.readConfig(app.getPath('appData')+"/rotctlGUI");
-rotctlProtocol.setAddress(configJSON.address);
-rotctlProtocol.setPolling(configJSON.polling);
-rotctlProtocol.setPort(configJSON.port);
-rotctlProtocol.setSouthStop(true);
-rotctlProtocol.setminSkew(5);
+rotctlProtocol.setAddress(configFile.getAddress);
+rotctlProtocol.setPort(configFile.getPort);
+rotctlProtocol.setPolling(configFile.getPolling);
+rotctlProtocol.setminSkew(configFile.getminSkew);
+if (configFile.getminSkew == 'S')       {rotctlProtocol.setSouthStop(true);} else {rotctlProtocol.setSouthStop(false);}
+if (configFile.getMoveSupported == 'Y') {rotctlProtocol.setMoveTO(true);}    else {rotctlProtocol.setMoveTo(false);}
+
 
 
 //TODO: protocol errors
@@ -38,7 +41,7 @@ const createWindow = () => {
   mainWin.loadFile('gui/compass/compass.html')
   mainWin.webContents.on('did-finish-load',() => {
     rotctlProtocol.connect(); 
-    mainWin.webContents.send('main_tx_title',"pppp   pppp oooo ll k h kjhk jhkjh ".substring(0,20));
+    mainWin.webContents.send('main_tx_title',configFile.getName().substring(0,20));
     mainWin.webContents.send('main_tx_setStop',"S");
   });
 }
