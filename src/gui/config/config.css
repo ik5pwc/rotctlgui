@@ -190,3 +190,10 @@ input#error ~ .tooltipError {
   margin-top:20px;
   margin-left: 140px;
 }
+
+#save.nosave { 
+  cursor:default;
+  color: lightgray;
+  background-color: #66d193;
+}
+#save.nosave:hover {background: #66d193;}

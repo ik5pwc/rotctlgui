@@ -21,7 +21,18 @@ const g_currentCFG = {
     path    : ""
 };
   
-
+const g_newCFG = {
+    name    : "Rotator 1",
+    address : "0",
+    port    : 0,
+    polling : 0,
+    error   : 0,
+    stop    : "",
+    moveTo  : "",
+    file    : "default.json",
+    path    : ""
+};
+  
 
 /*------------------------------------------------------
  * Function: startConfig

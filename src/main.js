@@ -4,6 +4,7 @@ const { globalEmitter }      = require('./node_events.js');
 const path                   = require('path')
 const rotctlProtocol         = require('./rotctlProtocol.js');
 const configFile             = require('./configFile.js');
+const { dialog }             = require('electron')
 
 let mainWin;
 let winCFG;
@@ -12,10 +13,12 @@ const VERSION = "0.9"
 
 readConfiguration();
 
+// todo: chiusura finestra di config dalla X cosa fa?
+// todo: config avviso valori modificati in chiusura
 //TODO: protocol errors
 // TODO: logging avanzato
 // TODO: command line per prendere il nome del file di configurazione
-//TODO config window
+//TODO config help
 //TODO help (punta su github)
 // todo: disattivare scrolling
 // todo: la config deve essere modale
@@ -48,7 +51,7 @@ const createWinCFG = () => {
   winCFG = new BrowserWindow({
     frame: true,
     width: 350,
-    height: 750,
+    height: 560,
     resizable: false,
     autoHideMenuBar: false,
     menuBarVisible:true,
@@ -118,12 +121,12 @@ globalEmitter.on('rotctlProtocol_tx_conn', (value)    => {mainWin.webContents.se
 globalEmitter.on('rotctlProtocol_tx_azimuth', (value) => {mainWin.webContents.send('main_tx_azimuth',value);});
 globalEmitter.on('rotctlProtocol_tx_onTarget',(value) => {mainWin.webContents.send('main_tx_target',value);});
 
-
+/* Route Events from main window to main window */
 ipcMain.on('main_rx_target',(event, value)    => {rotctlProtocol.setTarget(value);});
 ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});
 ipcMain.on('main_rx_stopMotor',(event)        => {rotctlProtocol.stop();});
 
-
-
+ipcMain.on('main_rx_configCancel',(event)      => {winCFG.close()});
+ipcMain.on('main_rx_configSave',(event,cfg)      => {console.log(cfg)});  // prendere la nuova cfg, salvare il file, ricaricarla e fare la nuova connessione
 
 

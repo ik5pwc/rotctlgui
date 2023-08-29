@@ -13,8 +13,10 @@
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  config_rx_allconf:       (callback) => ipcRenderer.on('main_tx_allconf',(callback))
- /*
+  config_rx_allconf:       (callback) => ipcRenderer.on('main_tx_allconf',(callback)),
+  config_tx_cancel:        ()         => ipcRenderer.send('main_rx_configCancel'),
+  config_tx_save:          (cfg)      => ipcRenderer.send('main_rx_configSave',cfg)
+  /*
   compass_rx_version:      (callback) => ipcRenderer.on('main_tx_version',(callback)),
   compass_rx_stop:         (callback) => ipcRenderer.on('main_tx_stop',(callback)),
   compass_tx_target:       (az)       => ipcRenderer.send('main_rx_target',az),

@@ -12,7 +12,7 @@
  const { contextBridge, ipcRenderer } = require('electron'); 
 
 
-contextBridge.exposeInMainWorld('electronAPI', {
+contextBridge.exposeInMainWorld('electronAPI', {         
   compass_rx_conn:         (callback) => ipcRenderer.on('main_tx_conn',(callback)),
   compass_rx_azimuth:      (callback) => ipcRenderer.on('main_tx_azimuth',(callback)),
   compass_rx_target:       (callback) => ipcRenderer.on('main_tx_target',(callback)),
