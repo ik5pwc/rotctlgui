@@ -10,12 +10,12 @@
     <link rel="stylesheet" type="text/css" href="./compass.css">
   </head>
 
-  <body onload="startApp();">
+  <body onload="startCompass();">
 
     <div class="container">
       <div id="title" class="title">Rotator 1</div>
       <div class="containerStop" id="stopNorth">
-        <div class="stop">STOP</div>
+        <div class="stop" >STOP</div>
       </div>
       <div id="compassContainer" class="compass">
         <canvas 
@@ -65,6 +65,7 @@
       <div class="containerStop" id="stopSouth">
         <div class="stop" >STOP</div>
       </div>
+      <div id="version" class="version">rotctlGUI ver. 0.99a</div>
       <div id="button_ccw" class="button" onmousedown="pushButton(this);" onmouseup="releaseButton(this);">CCW</div>
       <div id="button_cw"  class="button" onmousedown="pushButton(this);" onmouseup="releaseButton(this);">CW</div>
       <div id="degree" class="degree off">000</div>

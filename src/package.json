@@ -10,7 +10,8 @@
   "author": "IK5PWC, CIVININI Luca <luca@ik5pwc.it>",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^25.3.2"
+    "electron": "^25.3.2",
+    "electron-packager": "^17.1.2"
   },
   "dependencies": {
     "fs": "^0.0.1-security",

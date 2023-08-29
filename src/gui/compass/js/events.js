@@ -15,7 +15,7 @@
  * Attach listeners to HTML objects
  *
  * Invoked by:
- * . startApp               (gui/compass/js/compass.js)
+ * . startCompass           (gui/compass/js/compass.js)
  *
  * Called Sub/Functions: NONE
  *
@@ -90,7 +90,7 @@ function compassLeftClick() {
   if (g_gui.connected && g_gui.presetNew != null) { 
     g_gui.presetCur = g_gui.presetNew; 
     managePresetGUI();
-    window.electronAPI.compass_tx_setTarget(g_gui.presetCur);
+    window.electronAPI.compass_tx_target(g_gui.presetCur);
   }
 }
   
@@ -283,9 +283,9 @@ window.electronAPI.compass_rx_title((_event,title) =>{
 
 
 /*------------------------------------------------------
- * Function: compass_rx_setStop
+ * Function: compass_rx_stop
  * -------------------------------
- * Display STOP label on north or south
+ * Display STOP label on north or south in compass
  *
  * Invoked by:
  * . electronAPI                (gui/compass/js/ipc-render-main.js)
@@ -300,7 +300,28 @@ window.electronAPI.compass_rx_title((_event,title) =>{
  *
  * Arguments: NONE
 */
-window.electronAPI.compass_rx_setStop ((_event,stop) =>{
-  if (stop === "N") {document.getElementById("stopSouth").style.visibility='hidden';} 
-               else {document.getElementById("stopNorth").style.visibility='hidden';}
+window.electronAPI.compass_rx_stop ((_event,stop) =>{
+  if (stop === "N") {document.getElementById("stopSouth").style.visibility='hidden';document.getElementById("stopSouth").style.height='0px';} 
+               else {document.getElementById("stopNorth").style.visibility='hidden';document.getElementById("stopNorth").style.height='0px';}
 });
+
+
+
+/*------------------------------------------------------
+ * Function: compass_rx_version
+ * -------------------------------
+ * Display program version
+ *
+ * Invoked by:
+ * . electronAPI                (gui/compass/js/ipc-render-main.js)
+ *
+ * Called Sub/Functions: NONE 
+ *
+ * Global variables used: NONE
+ *
+ * DOM items affected:
+ * . version                    (gui/compass/compass.html)
+ *
+ * Arguments: NONE
+*/
+window.electronAPI.compass_rx_version ((_event,version) =>{document.getElementById("version").innerHTML=version;setOverlayDiv();});

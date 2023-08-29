@@ -31,7 +31,7 @@ const g_gui = {
  * from compass gauge and other divs
  *
  * Invoked by:
- * . startApp               (gui/compass/js/compass.js)
+ * . startCompass           (gui/compass/js/compass.js)
  *
  * Called Sub/Functions: NONE
  *
@@ -87,7 +87,7 @@ function updateGlobal() {
  * compass coordinates.
  *
  * Invoked by:
- * . startApp               (gui/compass/js/ompass.js)
+ * . startCompass           (gui/compass/js/ompass.js)
  *
  * Called Sub/Functions: NONE
  *
@@ -267,7 +267,7 @@ function managePresetGUI() {
 
 
 /*------------------------------------------------------
- * Function: startApp
+ * Function: startCompass
  * -------------------------------
  * Start application when page has been loaded
  *
@@ -275,7 +275,7 @@ function managePresetGUI() {
  * . page load event        (gui/compass/compass.html)
  *
  * Called Sub/Functions: 
- * . addListeners           (gui/compass/js/events.js)
+ * . addListeners           (gui/config/js/events.js)
  * . updateGlobal           (gui/compass/js/compass.js)
  * . setOverlayDiv          (gui/compass/js/compass.js)
  * 
@@ -285,7 +285,7 @@ function managePresetGUI() {
  * 
  * Arguments: NONE
 */
-function startApp () {
+function startCompass () {
   // Add event listeners
   addListeners();
 

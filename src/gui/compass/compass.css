@@ -129,3 +129,14 @@ body {
 }
 
 .push {background-color: #26d126;}
+
+.version {
+  position: relative;
+  text-align: center;
+  /*top: 0px;*/
+  bottom:0px;
+  left:0px;
+  color: #CCCCCC;
+  font-family: sans-serif;
+  font-size: 12px;
+}

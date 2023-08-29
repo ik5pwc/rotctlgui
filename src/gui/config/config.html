@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>rotctlGUI config</title>
+    <meta charset="utf-8">
+    <script src="./js/config.js" type="text/javascript"></script>
+    <script src="./js/events.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="./config.css">
+  </head>
+
+  <body onload="addListeners()">
+ 
+  
+    <div class="table name">
+      <div class="row">
+        <div class="cell label">Rotator Name</div>
+      </div>
+      <div class="row">
+        <div class="cell"><input style="text-align: center;" id="name" type="text" maxlength="20"></div>  
+      </div>
+    </div>
+
+    <!-- network configuration -->
+    <fieldset  class="network">
+      <legend class="network">Network</legend>
+      <div class="table description">
+        <div class="row">
+            <div class="cell explain">Computer where rotctld instance run</div>
+            <div class="cell help">?</div>
+        </div>
+      </div>
+     
+      <div class="table">
+        <div class="row">
+          <div class="cell label" >Name / IP address</div>
+          <div class="cell"></div>
+          <div class="cell label">TCP Port</div>
+        </div>
+
+        <div class="row">
+          <div class="cell"><input id="address" type="text" size="20"></div>
+          <div class="cell"><b>:</b>&nbsp;</div>
+          <div class="cell">
+            <input type="text" size="5" maxlength="5" id="port">
+            <span class="tooltipError">Valid values:<br>1024 to 49151</span>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    
+    <!-- Rotator configuration -->
+    <fieldset class="rotator">
+      <legend class="rotator">Rotator</legend>
+      <div class="table description">
+        <div class="row">
+            <div class="cell explain">Rotator positioning behaviour</div>
+            <div class="cell help">?</div>
+        </div>
+      </div>
+      <div class="table" style="height: 50px;">
+        <div class="row">
+          <div class="cell label">Position polling</div>
+          <div class="cell"></div>
+          <div class="cell label">Target max error</div>
+          <div class="cell"></div>
+        </div>
+        <div class="row">
+          <div class="cell label">
+            <input type="text"  maxlength="4" id="polling"> &nbsp;milliseconds
+            <span class="tooltipError">Valid values:<br>200 to 9999</span>
+          </div>
+          <div class="cell"></div>
+          <div class="cell label">
+            <input type="text" maxlength="2" id="error" pattern="[0-9]+"> &nbsp;degrees
+            <span class="tooltipError">Valid values:<br>3 to 20</span>
+          </div>
+          <div class="cell"></div>
+        </div>
+      </div>
+      <div class="table">        
+        <div class="row">
+          <div class="cell" style="padding-top: 15px;">Rotator stops at:</div>
+        </div>
+        <div class="row">
+          <div class="cell label">NORTH</div>
+          <div class="cell"></div>
+          <div class="cell label">SOUTH</div>
+        </div>        
+        <div class="row">
+          <div class="cell radiobutton"><input name="stop" id="stopN" type="radio" value="N"></div>
+          <div class="cell"></div>
+          <div class="cell radiobutton"><input name="stop" id='stopS' type="radio" value="S"></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- advanced configuration -->
+    <fieldset class="advanced">
+      <legend class="advanced">Advanced </legend>
+      <div class="table description">
+        <div class="row">
+            <div class="cell explain">Who handles "point to" command ?</div>
+            <div class="cell help">?</div>
+        </div>
+      </div>
+      <div class="table">
+        <div class="row">
+          <div class="cell label">rotctlGUI </div>
+          <div class="cell"></div>
+          <div class="cell label">Hamlib</div>
+        </div>
+        <div class="row">
+          <div class="cell"><input name="pcommand" id="rotctlgui" type="radio" value="Y" checked></div>
+          <div class="cell"></div>
+          <div class="cell"><input name="pcommand" id="hamlib" type="radio" value="N"></div>
+        </div>
+      </div>
+    </fieldset>
+    <div class="table" style="margin-left:15px;margin-top:10px">
+      <div class="row">
+        <div class="cell label" style="text-align:left;">File name: &nbsp;</div>
+        <div class="cell"><input name="filename" id="filename" type="text" value="N"></div>
+      </div>
+      <div class="row">
+        <div class="cell label" style="padding-top:5px;">Full path:</div>
+        <div class="cell label" id="filepath"></div>
+      </div>  
+    </div>
+    <div class="table" id="buttons">
+      <div class="row">
+        <div class="cell"><span class="button" id="save">SAVE</span></div>
+        <div class="cell"><span class="button" id="cancel">cancel</span></div>
+      </div>
+    </div>
+  </body>
+</html>
