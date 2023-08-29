@@ -10,7 +10,6 @@ let mainWin;
 let winCFG;
 
 
-
 const VERSION = "0.9"
 
 readConfiguration();
