@@ -5,7 +5,6 @@ const path                   = require('path')
 const rotctlProtocol         = require('./rotctlProtocol.js');
 const configFile             = require('./configFile.js');
 
-
 let mainWin;
 let winCFG;
 
