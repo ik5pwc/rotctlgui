@@ -5,6 +5,10 @@ const path                   = require('path')
 const rotctlProtocol         = require('./rotctlProtocol.js');
 const configFile             = require('./configFile.js');
 const { dialog }             = require('electron')
+let myClasses                = require('./myclasses.js');
+
+
+const currentConfig = new myClasses.config();
 
 let mainWin;
 let winCFG;
