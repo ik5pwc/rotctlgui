@@ -9,9 +9,9 @@
 */
 
 /* --------------------- Required modules --------------------- */
-const Net = require('node:net'); 
+const Net               = require('node:net'); 
 const { globalEmitter } = require('./node_events.js');
-
+const myClasses         = require('./myclasses.js');
 
 
 /* --------------------------------------------------------------------------------------------------------- */
@@ -19,6 +19,7 @@ const { globalEmitter } = require('./node_events.js');
 /* --------------------------------------------------------------------------------------------------------- */
 
 const client = new Net.Socket();      // TCP Socket
+const config = new myClasses.config;
 
 const rotctld = {                     // ROTCTLD network information 
   host     : "" ,                     // FQDN or ip address - default: localhost

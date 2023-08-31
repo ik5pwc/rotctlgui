@@ -8,7 +8,7 @@ const { dialog }             = require('electron')
 let myClasses                = require('./myclasses.js');
 
 
-const currentConfig = new myClasses.config();
+const configCurrent = new myClasses.config();
 
 let mainWin;
 let winCFG;
@@ -103,17 +103,16 @@ app.whenReady().then(() => { createWinCFG()});
 
 
 function readConfiguration() {
-
   // Read configuration file
-  configFile.readConfigFile(app.getPath('appData')+"/rotctlGUI/default.json");
+  configFile.readConfigFile(app.getPath('appData')+"/rotctlGUI/default.json",configCurrent);
 
-  // export configuration
-  rotctlProtocol.setAddress(configFile.getAddress());
-  rotctlProtocol.setPort(configFile.getPort());
-  rotctlProtocol.setPolling(configFile.getPolling());
-  rotctlProtocol.setminSkew(configFile.getminSkew());
-  if (configFile.getStop() == 'S')             {rotctlProtocol.setSouthStop(true);} else {rotctlProtocol.setSouthStop(false);}
-  if (configFile.getMoveSupported() == 'Y') {rotctlProtocol.setMoveTO(true);}    else {rotctlProtocol.setMoveTo(false);}
+  // export configuration to all required modules
+  rotctlProtocol.setAddress(configCurrent.address);
+  rotctlProtocol.setPort(configCurrent.port);
+  rotctlProtocol.setPolling(configCurrent.polling);
+  rotctlProtocol.setminSkew(configCurrent.error);
+  if (configCurrent.stop == 'S')             {rotctlProtocol.setSouthStop(true);} else {rotctlProtocol.setSouthStop(false);}
+  if (configCurrent.moveTo == 'Y') {rotctlProtocol.setMoveTO(true);}    else {rotctlProtocol.setMoveTo(false);}
 }
 
 

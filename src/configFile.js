@@ -9,8 +9,9 @@
 */
 
 /* ---------------- Required modules and files ---------------- */
-const fs = require('fs');
-const path = require('path');
+const fs        = require('fs');
+const path      = require('path');
+const myClasses = require('./myclasses.js');
 
 
 
@@ -19,25 +20,28 @@ const path = require('path');
 /* --------------------------------------------------------------------------------------------------------- */
 
 // Below the default values for all parameters
-const defaultPort            = 4533;
-const defaultPolling         = 500;
-const defaultMaxDegreeError  = 5;
-const defaultStop            = "S";
-const defaultMoveToSupported = "N";
+
+//CFGDefault.port    = 4533;
+//CFGDefault.polling = 500;
+//CFGDefault.error   = 5;
+//CFGDefault.stop    = "S";
+//CFGDefault.moveTo  = "N";
+
 
 // Here is the corresponding JSON for default config
-const defaultCfg ="{"
+/*
+const JSONdefault ="{"
                  +" \"name\": \"Rotator 1\","
                  +" \"address\": \"localhost\","
-                 +" \"port\": " + defaultPort + ","
-                 +" \"polling\": " + defaultPolling + ","
-                 +" \"max_degree_error\": " + defaultMaxDegreeError + ","
-                 +" \"stop\": \"" + defaultStop + "\","
-                 +" \"move_to_supported\": \"" + defaultMoveToSupported + "\" "
+                 +" \"port\": " + CFGDefault.port + ","
+                 +" \"polling\": " + CFGDefault.polling + ","
+                 +" \"max_degree_error\": " + CFGDefault.error + ","
+                 +" \"stop\": \"" + CFGDefault.stop + "\","
+                 +" \"move_to_supported\": \"" + CFGDefault.moveTo + "\" "
                  +"}";
-
+*/
 // Store configuration JSON
-let configJSON= JSON.parse(defaultCfg);
+//let JSONConfig= JSON.parse(JSONdefault);
 let configFile = "";
 let configPath = "";
 
@@ -46,13 +50,13 @@ let configPath = "";
 /* --------------------------------------------------------------------------------------------------------- */
 
 exports.readConfigFile   = readConfigFile;
-exports.getName          = function () {return configJSON.name;};
-exports.getAddress       = function () {return configJSON.address;};
-exports.getPort          = function () {return configJSON.port;};
-exports.getPolling       = function () {return configJSON.polling;};
-exports.getminSkew       = function () {return configJSON.max_degree_error;};
-exports.getStop          = function () {return configJSON.stop;};
-exports.getMoveSupported = function () {return configJSON.move_to_supported;};
+exports.getName          = function () {return JSONConfig.name;};
+exports.getAddress       = function () {return JSONConfig.address;};
+exports.getPort          = function () {return JSONConfig.port;};
+exports.getPolling       = function () {return JSONConfig.polling;};
+exports.getminSkew       = function () {return JSONConfig.max_degree_error;};
+exports.getStop          = function () {return JSONConfig.stop;};
+exports.getMoveSupported = function () {return JSONConfig.move_to_supported;};
 exports.getConfigFile    = function () {return configFile;};
 exports.getConfigPath    = function () {return configPath;};
 
@@ -79,26 +83,35 @@ exports.getConfigPath    = function () {return configPath;};
  * Arguments:
  * . file: full path to configuration file
 */
-function readConfigFile(file) {
-  configPath = path.dirname(file);
-  configFile = path.basename(file);
+function readConfigFile(file,config) {
+  let JSONConfig= ""                             // JSON data from file
+  //let configFromFile = new myClasses.config();   // configuration object
 
   // Try to read configuration file
   try {   
     // parse configuration file
-    configJSON = JSON.parse(fs.readFileSync(file, 'utf8'));
+    JSONConfig = JSON.parse(fs.readFileSync(file, 'utf8'));
     console.log("Reading configuration file " + file);
-    validateConfig();
-    
-    
+    JSONConfig = validateConfig(JSONConfig);
   } catch {
     console.error(file + " doesn't exist or is not a properly configured JSON file, loading default values...");
+    JSONConfig = createJSONfromConfig(new myClasses.config);
 
     // Save config file
-    saveConfigFile(file);
+    saveConfigFile(file, JSONConfig);
   }
+  
+  // populate configuration data structure passed from caller
+  config.name    = JSONConfig.name;
+  config.address = JSONConfig.address;
+  config.port    = JSONConfig.port;
+  config.polling = JSONConfig.polling;
+  config.error   = JSONConfig.error;
+  config.stop    = JSONConfig.stop;
+  config.moveTo  = JSONConfig.port;
+  config.file    = path.basename(file);
+  config.path    = path.dirname(file);
 }
-
 
 
 
@@ -132,37 +145,41 @@ function readConfigFile(file) {
  *
  * Arguments: NONE
 */
-function validateConfig () {
-  
+function validateConfig (cfg) {
+  let defcfg = new myClasses.config();         // empty "config" object used for default data
+
   // Check for valid port number
-  if ( ! (!isNaN(configJSON.port) && configJSON.port >1 &&  configJSON.port < 65535)) {
-    console.warn("Invalid configuration for \"port\": " + configJSON.port + " (allowed value: 1 ... 65535). Using default " + defaultPort);
-    configJSON.port = defaultPort;
+  if ( ! (!isNaN(cfg.port) && cfg.port >1 &&  cfg.port < 65535)) {
+    console.warn("Invalid configuration for \"port\": " + cfg.port + " (allowed value: 1 ... 65535). Using default " + defcfg.port);
+    cfg.port = defcfg.port;
   } 
 
   // Check for valid polling rate 
-  if ( ! (!isNaN(configJSON.polling) && configJSON.polling >200 &&  configJSON.polling < 9999)) {
-    console.warn("Invalid configuration for \"polling\": " + configJSON.polling + "(allowed value: 100 ... 9999). Using default " + defaultPolling);
-    configJSON.polling = defaultPolling;
+  if ( ! (!isNaN(cfg.polling) && cfg.polling >200 &&  cfg.polling < 9999)) {
+    console.warn("Invalid configuration for \"polling\": " + cfg.polling + "(allowed value: 100 ... 9999). Using default " + defcfg.polling);
+    cfg.polling = defcfg.polling;
   }
 
   // Check for valid max_degree_error value 
-  if ( ! (!isNaN(configJSON.max_degree_error) && configJSON.max_degree_error >1 &&  configJSON.max_degree_error < 16)) {
-    console.warn("Invalid configuration for \"max_degree_error\": " + configJSON.max_degree_error + " (allowed value: 1 ... 15). Using default: " + defaultMaxDegreeError);
-    configJSON.max_degree_error = defaultMaxDegreeError;
+  if ( ! (!isNaN(cfg.max_degree_error) && cfg.max_degree_error >1 &&  cfg.max_degree_error < 16)) {
+    console.warn("Invalid configuration for \"max_degree_error\": " + cfg.max_degree_error + " (allowed value: 1 ... 15). Using default: " + defcfg.error);
+    cfg.max_degree_error = defcfg.error;
   } 
 
   // Check for valid stop value 
-  if (configJSON.stop.toString().match(/(s|n)/i) == undefined ) {
-    console.warn("Invalid configuration for \"stop\": " + configJSON.stop + " (allowed value: S or N). Using default " + defaultStop);
-    configJSON.stop = defaultStop;
+  if (cfg.stop.toString().match(/(s|n)/i) == undefined ) {
+    console.warn("Invalid configuration for \"stop\": " + cfg.stop + " (allowed value: S or N). Using default " + defcfg.stop);
+    cfg.stop = defcfg.stop;
   } 
 
   // check for valid move_to_supported value
-  if (configJSON.move_to_supported.toString().match(/(y|n)/i) == undefined) {
-    console.warn("Invalid configuration for \"move_to_supported\": " + configJSON.move_to_supported + " (allowed value: Y or N). Using default " + defaultMoveToSupported);
-    configJSON.move_to_supported = defaultMoveToSupported;
+  if (cfg.move_to_supported.toString().match(/(y|n)/i) == undefined) {
+    console.warn("Invalid configuration for \"move_to_supported\": " + cfg.move_to_supported + " (allowed value: Y or N). Using default " + cfg.moveTo);
+    cfg.move_to_supported = defcfg.moveTo;
   }
+
+  // Return updated config object
+  return cfg;
 }
 
 
@@ -187,12 +204,30 @@ function validateConfig () {
  * Arguments: 
  * . file: full path to file to write
 */
-function saveConfigFile(file){
+function saveConfigFile(file,cfg){
   try {
     // Create path and save
     fs.mkdirSync(path.dirname(file),{recursive:true});
-    fs.writeFileSync(file,JSON.stringify(configJSON,null,2));
+    fs.writeFileSync(file,JSON.stringify(cfg,null,2));
   } catch {
     console.error("Unable to save config file " + file);
   }
+}
+
+
+
+function createJSONfromConfig(cfg) {
+
+  const JSONdefault ="{"
+  +" \"name\": \"" + cfg.name + "\","
+  +" \"address\": \"" + cfg.address + "\","
+  +" \"port\": " + cfg.port + ","
+  +" \"polling\": " + cfg.polling + ","
+  +" \"max_degree_error\": " + cfg.error + ","
+  +" \"stop\": " + cfg.stop + ","
+  +" \"move_to_supported\": \"" + CFGDefault.moveTo + "\" "
+  +"}";
+
+
+
 }
