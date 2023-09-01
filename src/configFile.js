@@ -106,7 +106,7 @@ function readConfigFile(file,config) {
   config.address = JSONConfig.address;
   config.port    = JSONConfig.port;
   config.polling = JSONConfig.polling;
-  config.error   = JSONConfig.error;
+  config.error   = JSONConfig.max_degree_error;
   config.stop    = JSONConfig.stop;
   config.moveTo  = JSONConfig.port;
   config.file    = path.basename(file);
@@ -167,8 +167,8 @@ function validateConfig (cfg) {
   } 
 
   // Check for valid stop value 
-  if (cfg.stop.toString().match(/(s|n)/i) == undefined ) {
-    console.warn("Invalid configuration for \"stop\": " + cfg.stop + " (allowed value: S or N). Using default " + defcfg.stop);
+  if ( cfg.stop.toString().match(/(0|180)/i) == undefined ) {
+    console.warn("Invalid configuration for \"stop\": " + cfg.stop + " (allowed value: 0 or 180). Using default " + defcfg.stop);
     cfg.stop = defcfg.stop;
   } 
 

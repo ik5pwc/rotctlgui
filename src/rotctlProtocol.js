@@ -19,7 +19,7 @@ const myClasses         = require('./myclasses.js');
 /* --------------------------------------------------------------------------------------------------------- */
 
 const client = new Net.Socket();      // TCP Socket
-const config = new myClasses.config;
+const config = new myClasses.config;  // Configuration
 
 const rotctld = {                     // ROTCTLD network information 
   host     : "" ,                     // FQDN or ip address - default: localhost
@@ -60,7 +60,14 @@ exports.setPolling   = function (rate)    {rotctld.polling = rate;};
 exports.setminSkew   = function (skew)    {rotctld.minSkew = skew;};
 exports.setSouthStop = function (stop)    {rotctld.southStop = stop;};
 exports.setMoveTo    = function (moveTo)  {rotctld.moveTo = moveTo;};
-
+exports.setConfig    = function (fromMain) {
+  config.address = fromMain.address;
+  config.port = fromMain.port;
+  config.polling = fromMain.polling;
+  config.error = fromMain.error;
+  config.stop = fromMain.stop;
+  config.moveTo = fromMain.moveTo;
+}
 
 
 /*------------------------------------------------------
@@ -142,14 +149,14 @@ function setTarget(target) {
  * Arguments: NONE
 */
 function connect() {
-  console.log("Starting connection to " + rotctld.host + ":" + rotctld.port);
+  console.log("Starting connection to " + config.address + ":" + config.port);
   
   // Generic connection parameters
   client.setKeepAlive = true;
   client.setTimeout = 2000;
 
   // Start Connection
-  client.connect({ port: rotctld.port, host: rotctld.host },undefined);
+  client.connect({ port: config.port, host: config.address },undefined);
 }
 
 
@@ -476,7 +483,7 @@ client.on('data',(data) => {
 
 
 function hClosed(){
-  console.log("Connection to " + rotctld.host + ":" + rotctld.port + " closed. Retry in 2 sec.")
+  console.warn("Connection to " + config.address + ":" + config.port + " closed. Retry in 2 sec.")
   
   // Notify GUI about disconnect
   globalEmitter.emit('rotctlProtocol_tx_conn',false);
