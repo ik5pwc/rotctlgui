@@ -301,7 +301,7 @@ window.electronAPI.compass_rx_title((_event,title) =>{
  * Arguments: NONE
 */
 window.electronAPI.compass_rx_stop ((_event,stop) =>{
-  if (stop === "N") {document.getElementById("stopSouth").style.visibility='hidden';document.getElementById("stopSouth").style.height='0px';} 
+  if (stop === 0) {document.getElementById("stopSouth").style.visibility='hidden';document.getElementById("stopSouth").style.height='0px';} 
                else {document.getElementById("stopNorth").style.visibility='hidden';document.getElementById("stopNorth").style.height='0px';}
 });
 

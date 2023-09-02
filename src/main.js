@@ -6,6 +6,7 @@ const rotctlProtocol         = require('./rotctlProtocol.js');
 const configFile             = require('./configFile.js');
 const { dialog }             = require('electron')
 let myClasses                = require('./myclasses.js');
+const { config } = require('process');
 
 
 const configuration = new myClasses.config();
@@ -45,8 +46,8 @@ const createWinMAIN = () => {
   mainWin.webContents.on('did-finish-load',() => {
 
     rotctlProtocol.connect(); 
-    mainWin.webContents.send('main_tx_title',configFile.getName().substring(0,20));
-    mainWin.webContents.send('main_tx_stop',"S");
+    mainWin.webContents.send('main_tx_title',configuration.name.substring(0,20));
+    mainWin.webContents.send('main_tx_stop',configuration.stop);
     mainWin.webContents.send('main_tx_version',"rotctlGUI ver. " + VERSION);
   });
 }
@@ -95,7 +96,7 @@ const createWinCFG = () => {
 }
 
 app.whenReady().then(() => { createWinMAIN()});
-app.whenReady().then(() => { createWinCFG()});
+//app.whenReady().then(() => { createWinCFG()});
 
 
 
@@ -120,11 +121,13 @@ globalEmitter.on('rotctlProtocol_tx_azimuth', (value) => {mainWin.webContents.se
 globalEmitter.on('rotctlProtocol_tx_onTarget',(value) => {mainWin.webContents.send('main_tx_target',value);});
 
 /* Route Events from main window to main window */
+exports.isConnected    = function (conn)  {mainWin.webContents.send('main_tx_conn',conn);};
+
 ipcMain.on('main_rx_target',(event, value)    => {rotctlProtocol.setTarget(value);});
 ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});
 ipcMain.on('main_rx_stopMotor',(event)        => {rotctlProtocol.stop();});
 
-ipcMain.on('main_rx_configCancel',(event)      => {winCFG.close()});
-ipcMain.on('main_rx_configSave',(event,cfg)      => {console.log(cfg)});  // prendere la nuova cfg, salvare il file, ricaricarla e fare la nuova connessione
+ipcMain.on('main_rx_configCancel',(event)     => {winCFG.close()});
+ipcMain.on('main_rx_configSave',(event,cfg)   => {console.log(cfg)});  // prendere la nuova cfg, salvare il file, ricaricarla e fare la nuova connessione
 
 

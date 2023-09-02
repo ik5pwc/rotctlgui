@@ -84,7 +84,9 @@ exports.getConfigPath    = function () {return configPath;};
  * . file: full path to configuration file
 */
 function readConfigFile(file,config) {
-  let JSONConfig= ""                             // JSON data from file
+  let JSONConfig= ""                          // JSON data from file
+  let defcfg = new myClasses.config          // used for default config
+
   //let configFromFile = new myClasses.config();   // configuration object
 
   // Try to read configuration file
@@ -95,8 +97,16 @@ function readConfigFile(file,config) {
     JSONConfig = validateConfig(JSONConfig);
   } catch {
     console.error(file + " doesn't exist or is not a properly configured JSON file, loading default values...");
-    JSONConfig = createJSONfromConfig(new myClasses.config);
-
+    JSONConfig = "{"
+                  +" \"name\": \"" + defcfg.name + "\","
+                  +" \"address\": \"" + defcfg.address + "\","
+                  +" \"port\": " + defcfg.port + ","
+                  +" \"polling\": " + defcfg.polling + ","
+                  +" \"max_degree_error\": " + defcfg.error + ","
+                  +" \"stop\": " + defcfg.stop + ","
+                  +" \"move_to_supported\": \"" + defcfg.moveTo + "\" "
+                  +"}";
+   
     // Save config file
     saveConfigFile(file, JSONConfig);
   }
@@ -149,7 +159,7 @@ function validateConfig (cfg) {
   let defcfg = new myClasses.config();         // empty "config" object used for default data
 
   // Check for valid port number
-  if ( ! (!isNaN(cfg.port) && cfg.port >1 &&  cfg.port < 65535)) {
+  if ( ! (!isNaN(cfg.port) && cfg.port >1024 &&  cfg.port < 65535)) {
     console.warn("Invalid configuration for \"port\": " + cfg.port + " (allowed value: 1 ... 65535). Using default " + defcfg.port);
     cfg.port = defcfg.port;
   } 
@@ -167,7 +177,7 @@ function validateConfig (cfg) {
   } 
 
   // Check for valid stop value 
-  if ( cfg.stop.toString().match(/(0|180)/i) == undefined ) {
+  if ( !isNaN(cfg.stop) && cfg.stop != 180 && cfg.stop != 0 ) {
     console.warn("Invalid configuration for \"stop\": " + cfg.stop + " (allowed value: 0 or 180). Using default " + defcfg.stop);
     cfg.stop = defcfg.stop;
   } 
@@ -215,19 +225,3 @@ function saveConfigFile(file,cfg){
 }
 
 
-
-function createJSONfromConfig(cfg) {
-
-  const JSONdefault ="{"
-  +" \"name\": \"" + cfg.name + "\","
-  +" \"address\": \"" + cfg.address + "\","
-  +" \"port\": " + cfg.port + ","
-  +" \"polling\": " + cfg.polling + ","
-  +" \"max_degree_error\": " + cfg.error + ","
-  +" \"stop\": " + cfg.stop + ","
-  +" \"move_to_supported\": \"" + CFGDefault.moveTo + "\" "
-  +"}";
-
-
-
-}

@@ -10,17 +10,20 @@
 
 /* --------------------- Required modules --------------------- */
 const Net               = require('node:net'); 
-const { globalEmitter } = require('./node_events.js');
+//const { globalEmitter } = require('./node_events.js');
 const myClasses         = require('./myclasses.js');
-
+const main              =require ('./main.js');
+//const mainModule = require ('parent-module');
+//import parentModule from 'parent-module';
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                              Global objects                                               /*
 /* --------------------------------------------------------------------------------------------------------- */
 
+
 const client = new Net.Socket();      // TCP Socket
 const config = new myClasses.config;  // Configuration
-
+/*
 const rotctld = {                     // ROTCTLD network information 
   host     : "" ,                     // FQDN or ip address - default: localhost
   port     : 0,                       // ROTCTLD listen port - default: 4533
@@ -33,7 +36,7 @@ const rotctld = {                     // ROTCTLD network information
                                       // If false, then rotctlGUI will turn motor CW or CCW and stop when it reach required
                                       // destination. Leave it to false in doubt.   
 };
-
+*/
 const status = {            // Manage rotctl protocol and store rotor configuration
   sent        :[],             // list of sent commands (FIFO)                     
   rxBuffer    : "",            // Received data from rotCTLD
@@ -54,12 +57,13 @@ exports.connect      = connect;
 exports.setTarget    = setTarget;
 exports.stop         = stop;
 exports.turn         = turn;
-exports.setAddress   = function (address) {rotctld.host = address;};
+/*exports.setAddress   = function (address) {rotctld.host = address;};
 exports.setPort      = function (port)    {rotctld.port = port;};
 exports.setPolling   = function (rate)    {rotctld.polling = rate;};
 exports.setminSkew   = function (skew)    {rotctld.minSkew = skew;};
 exports.setSouthStop = function (stop)    {rotctld.southStop = stop;};
 exports.setMoveTo    = function (moveTo)  {rotctld.moveTo = moveTo;};
+*/
 exports.setConfig    = function (fromMain) {
   config.address = fromMain.address;
   config.port = fromMain.port;
@@ -232,13 +236,13 @@ function turn(direction) {
  * . sendCommand            (rotctlProtocol.js)
  *
  * Global variables used: 
- * . rotctld                (rotctlProtocol.js)
+ * . config                 (rotctlProtocol.js)
  * 
  * Arguments: NONE
 */
 function getAzimuth () {
   if (status.connected) {sendCommand("+p");}
-  setTimeout(()=>{getAzimuth()},rotctld.polling);
+  setTimeout(()=>{getAzimuth()},config.polling);
 }
 
 
@@ -355,9 +359,9 @@ function replyCapabilities(buffer) {
   
   if (model != undefined) { 
     console.log("Rotator model: " + model[1]);
-    globalEmitter.emit('rotctlProtocol_tx_conn',true);    // Inform GUI connection is successfull
-    getAzimuth();                                         // Start polling
-    status.connected = true;
+    status.connected = true;                            // update connection status
+    main.isConnected(true);                             // inform GUI about status
+    getAzimuth();                                       // Start polling
 
     // Valid response detected
     return true;
@@ -486,7 +490,7 @@ function hClosed(){
   console.warn("Connection to " + config.address + ":" + config.port + " closed. Retry in 2 sec.")
   
   // Notify GUI about disconnect
-  globalEmitter.emit('rotctlProtocol_tx_conn',false);
+  main.isConnected(false);
   
   // Retry connection
   setTimeout(()=>{connect()},2000);
