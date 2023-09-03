@@ -19,63 +19,27 @@ const myClasses = require('./myclasses.js');
 /*                                              Global objects                                               /*
 /* --------------------------------------------------------------------------------------------------------- */
 
-// Below the default values for all parameters
 
-//CFGDefault.port    = 4533;
-//CFGDefault.polling = 500;
-//CFGDefault.error   = 5;
-//CFGDefault.stop    = "S";
-//CFGDefault.moveTo  = "N";
-
-
-// Here is the corresponding JSON for default config
-/*
-const JSONdefault ="{"
-                 +" \"name\": \"Rotator 1\","
-                 +" \"address\": \"localhost\","
-                 +" \"port\": " + CFGDefault.port + ","
-                 +" \"polling\": " + CFGDefault.polling + ","
-                 +" \"max_degree_error\": " + CFGDefault.error + ","
-                 +" \"stop\": \"" + CFGDefault.stop + "\","
-                 +" \"move_to_supported\": \"" + CFGDefault.moveTo + "\" "
-                 +"}";
-*/
-// Store configuration JSON
-//let JSONConfig= JSON.parse(JSONdefault);
-let configFile = "";
-let configPath = "";
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                            Exported Functions                                             /*
 /* --------------------------------------------------------------------------------------------------------- */
 
 exports.readConfigFile   = readConfigFile;
-exports.getName          = function () {return JSONConfig.name;};
-exports.getAddress       = function () {return JSONConfig.address;};
-exports.getPort          = function () {return JSONConfig.port;};
-exports.getPolling       = function () {return JSONConfig.polling;};
-exports.getminSkew       = function () {return JSONConfig.max_degree_error;};
-exports.getStop          = function () {return JSONConfig.stop;};
-exports.getMoveSupported = function () {return JSONConfig.move_to_supported;};
-exports.getConfigFile    = function () {return configFile;};
-exports.getConfigPath    = function () {return configPath;};
 
 
 /*------------------------------------------------------
  * Function: readConfigFile
  * -------------------------------
- * Read  configuration file or apply default settings 
+ * Read  configuration file and return settings 
  *
  * Invoked by:
- * . event emitter          (main.js)
+ * . startup                (main.js)
  *
  * Called Sub/Functions: 
  * . validateConfig         (configFile.js)
  *
- * Global variables used: 
- * . configJSON             (configFile.js)
- * . configFile             (configFile.js)
- * . configPath             (configFile.js)
+ * Global variables used: NONE
  * 
  * Global Objects used: NONE
  * . fs                     (configFile.js)   
@@ -87,9 +51,7 @@ function readConfigFile(file,config) {
   let JSONConfig= ""                          // JSON data from file
   let defcfg = new myClasses.config          // used for default config
 
-  //let configFromFile = new myClasses.config();   // configuration object
-
-  // Try to read configuration file
+  // Try to read and parse configuration file
   try {   
     // parse configuration file
     JSONConfig = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -103,7 +65,7 @@ function readConfigFile(file,config) {
                   +" \"port\": " + defcfg.port + ","
                   +" \"polling\": " + defcfg.polling + ","
                   +" \"max_degree_error\": " + defcfg.error + ","
-                  +" \"stop\": " + defcfg.stop + ","
+                  +" \"stop_degree\": " + defcfg.stop + ","
                   +" \"move_to_supported\": \"" + defcfg.moveTo + "\" "
                   +"}";
    
@@ -117,7 +79,7 @@ function readConfigFile(file,config) {
   config.port    = JSONConfig.port;
   config.polling = JSONConfig.polling;
   config.error   = JSONConfig.max_degree_error;
-  config.stop    = JSONConfig.stop;
+  config.stop    = JSONConfig.stop_degree;
   config.moveTo  = JSONConfig.move_to_supported;
   config.file    = path.basename(file);
   config.path    = path.dirname(file);
@@ -134,27 +96,23 @@ function readConfigFile(file,config) {
  * Function: validateConfig
  * -------------------------------
  * Validate all configuration options, using
- * default values if configured one is wrong
+ * default values if a value is wrong. Return a 
+ * "clean"  JSON string
  *
  * Invoked by:
  * . readConfigFile         (configFile.js)
  *
  * Called Sub/Functions: NONE
  * 
- * Global constants used:
- * . defaultPort            (configFile.js))
- * . defaultPolling         (configFile.js))
- * . defaultMaxDegreeError  (configFile.js))
- * . defaultStop            (configFile.js))
- * . defaultMoveToSupported (configFile.js))
+ * Global constants used: NONE
  *
- * Global variables used: 
- * . configJSON             (configFile.js)
+ * Global variables used: NONE 
  *
  * Global Objects used: NONE                   
  *
- * Arguments: NONE
-*/
+ * Arguments: 
+ * . cfg: configuration data in JSON format
+ */
 function validateConfig (cfg) {
   let defcfg = new myClasses.config();         // empty "config" object used for default data
 
@@ -177,8 +135,8 @@ function validateConfig (cfg) {
   } 
 
   // Check for valid stop value 
-  if ( !isNaN(cfg.stop) && cfg.stop != 180 && cfg.stop != 0 ) {
-    console.warn("Invalid configuration for \"stop\": " + cfg.stop + " (allowed value: 0 or 180). Using default " + defcfg.stop);
+  if ( !isNaN(cfg.stop_degree) && cfg.stop != 180 && cfg.stop_degree != 0 ) {
+    console.warn("Invalid configuration for \"stop\": " + cfg.stop_degree + " (allowed value: 0 or 180). Using default " + defcfg.stop);
     cfg.stop = defcfg.stop;
   } 
 
@@ -206,13 +164,14 @@ function validateConfig (cfg) {
  * 
  * Global constants used: NONE
  *
- * Global variables used: 
- * . configJSON             (configFile.js)
+ * Global variables used: NONE
  *
  * Global Objects used: NONE                   
  *
  * Arguments: 
  * . file: full path to file to write
+ * . cfg: JSON configuration string
+ * 
 */
 function saveConfigFile(file,cfg){
   try {

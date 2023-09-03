@@ -29,11 +29,11 @@
 function addListeners() {
   // Compass object
   const compass = document.getElementById("compass");
-  
-  compass.addEventListener( "mousemove",(event) => {compassMouseMove(event.layerX,event.layerY);}, false,);
-  compass.addEventListener( "mouseout",(event) => {compassMouseMove(event.layerX,event.layerY);}, false,);
-  compass.addEventListener( "click", () => {compassLeftClick();},false);
-  compass.addEventListener( "contextmenu", (e)=> {e.preventDefault();compassRightClick();},false);
+
+  compass.addEventListener("mousemove", (event) => { compassMouseMove(event.layerX, event.layerY); }, false,);
+  compass.addEventListener("mouseout", (event) => { compassMouseMove(event.layerX, event.layerY); }, false,);
+  compass.addEventListener("click", () => { compassLeftClick(); }, false);
+  compass.addEventListener("contextmenu", (e) => { e.preventDefault(); compassRightClick(); }, false);
 }
 
 
@@ -60,41 +60,41 @@ function addListeners() {
  * Arguments:
  * . mouseX, mouseY: mouse position relative to compass DIV
 */
-function compassMouseMove (mouseX,mouseY){
+function compassMouseMove(mouseX, mouseY) {
   if (g_gui.connected) {
-    evalPresetAngle (mouseX,mouseY);
+    evalPresetAngle(mouseX, mouseY);
     managePresetGUI();
   }
 }
 
-  
-  
- /*------------------------------------------------------
- * Function: compassLeftClick
- * -------------------------------
- * Invoked on left click on compass DIV
- *
- * Invoked by:
- * . event Listenter                    (gui/compass/js/events.js)
- *
- * Called Sub/Functions: 
- * . managePresetGUI                    (gui/compass/js/compass.js)
- * . electronAPI.compass_tx_setTarget   (gui/compass/js/ipc-render-main.js)
- *
- * Global variables used:
- * . g_gui                              (gui/compass/js/compass.js)
- *
- * Arguments: NONE
+
+
+/*------------------------------------------------------
+* Function: compassLeftClick
+* -------------------------------
+* Invoked on left click on compass DIV
+*
+* Invoked by:
+* . event Listenter                    (gui/compass/js/events.js)
+*
+* Called Sub/Functions: 
+* . managePresetGUI                    (gui/compass/js/compass.js)
+* . electronAPI.compass_tx_setTarget   (gui/compass/js/ipc-render-main.js)
+*
+* Global variables used:
+* . g_gui                              (gui/compass/js/compass.js)
+*
+* Arguments: NONE
 */
 function compassLeftClick() {
-  if (g_gui.connected && g_gui.presetNew != null) { 
-    g_gui.presetCur = g_gui.presetNew; 
+  if (g_gui.connected && g_gui.presetNew != null) {
+    g_gui.presetCur = g_gui.presetNew;
     managePresetGUI();
     window.electronAPI.compass_tx_target(g_gui.presetCur);
   }
 }
-  
- 
+
+
 
 /*------------------------------------------------------
  * Function: compassRightClick
@@ -117,12 +117,12 @@ function compassRightClick() {
   if (g_gui.connected) {
     g_gui.presetCur = null;
     g_gui.presetNew = null;
-    window.electronAPI.compass_tx_stopMotor();
+    window.electronAPI.compass_tx_turn("S");
     managePresetGUI();
   }
 }
-  
- 
+
+
 
 /*------------------------------------------------------
  * Function: releaseButton
@@ -140,9 +140,9 @@ function compassRightClick() {
  * Arguments: 
  * . obj: is the HTML object triggering the event
 */
-function releaseButton(obj){ 
+function releaseButton(obj) {
   obj.classList.remove('push');
-  window.electronAPI.compass_tx_turn("S"); 
+  window.electronAPI.compass_tx_turn("S");
 }
 
 
@@ -164,10 +164,10 @@ function releaseButton(obj){
  * Arguments: 
  * . obj: is the HTML object triggering the event
 */
-function pushButton(obj){
+function pushButton(obj) {
   if (g_gui.connected) {
     obj.classList.add('push');
-    window.electronAPI.compass_tx_turn(obj.innerHTML) 
+    window.electronAPI.compass_tx_turn(obj.innerHTML)
   }
 }
 
@@ -195,7 +195,7 @@ function pushButton(obj){
  *
  * Arguments: NONE
 */
-window.electronAPI.compass_rx_conn((_event,conn) => {
+window.electronAPI.compass_rx_conn((_event, conn) => {
   if (conn) {
     g_gui.connected = true;
     document.getElementById("degree").classList.remove('off');
@@ -206,10 +206,10 @@ window.electronAPI.compass_rx_conn((_event,conn) => {
     document.getElementById("degree").classList.add('off');
   }
 });
-  
 
 
-  
+
+
 
 /*------------------------------------------------------
  * Function: compass_rx_azimuth
@@ -229,7 +229,7 @@ window.electronAPI.compass_rx_conn((_event,conn) => {
  *
  * Arguments: NONE
 */
-window.electronAPI.compass_rx_azimuth((_event,value) => {updateCompass(value);});
+window.electronAPI.compass_rx_azimuth((_event, value) => { updateCompass(value); });
 
 
 
@@ -255,62 +255,14 @@ window.electronAPI.compass_rx_target((_event) => {
   g_gui.presetCur = null;
   managePresetGUI();
 });
-  
-
-
-/*------------------------------------------------------
- * Function: compass_rx_title
- * -------------------------------
- * Target reached
- *
- * Invoked by:
- * . electronAPI                (gui/compass/js/ipc-render-main.js)
- *
- * Called Sub/Functions: NONE 
- *
- * Global variables used: NONE
- *
- * DOM items affected:
- * . title                     (gui/compass/compass.html)
- *
- * Arguments: NONE
-*/
-window.electronAPI.compass_rx_title((_event,title) =>{
-  document.getElementById("title").innerHTML = title;
-  document.title = title + " (rotcctlGUI)";
-});
 
 
 
 /*------------------------------------------------------
- * Function: compass_rx_stop
+ * Function: compass_rx_misc
  * -------------------------------
- * Display STOP label on north or south in compass
- *
- * Invoked by:
- * . electronAPI                (gui/compass/js/ipc-render-main.js)
- *
- * Called Sub/Functions: NONE 
- *
- * Global variables used: NONE
- *
- * DOM items affected:
- * . stopSouth                  (gui/compass/compass.html)
- * . stopNorth                  (gui/compass/compass.html)
- *
- * Arguments: NONE
-*/
-window.electronAPI.compass_rx_stop ((_event,stop) =>{
-  if (stop === 0) {document.getElementById("stopSouth").style.visibility='hidden';document.getElementById("stopSouth").style.height='0px';} 
-               else {document.getElementById("stopNorth").style.visibility='hidden';document.getElementById("stopNorth").style.height='0px';}
-});
-
-
-
-/*------------------------------------------------------
- * Function: compass_rx_version
- * -------------------------------
- * Display program version
+ * Receives multiple information from main and 
+ * configure item in GUI
  *
  * Invoked by:
  * . electronAPI                (gui/compass/js/ipc-render-main.js)
@@ -321,7 +273,22 @@ window.electronAPI.compass_rx_stop ((_event,stop) =>{
  *
  * DOM items affected:
  * . version                    (gui/compass/compass.html)
+ * . title
+ * . stopSouth
+ * . stopNorth
  *
  * Arguments: NONE
 */
-window.electronAPI.compass_rx_version ((_event,version) =>{document.getElementById("version").innerHTML=version;setOverlayDiv();});
+window.electronAPI.compass_rx_misc((_event, name, stop, version) => {
+  // version
+  console.log(document.getElementById("version").innerHTML);
+  document.getElementById("version").innerHTML = "rotctlGUI v. " + version.toString() ;
+  console.log(document.getElementById("version").innerHTML);
+  setOverlayDiv();
+
+  if (stop === 0) { document.getElementById("stopSouth").style.visibility = 'hidden'; document.getElementById("stopSouth").style.height = '0px'; }
+  else { document.getElementById("stopNorth").style.visibility = 'hidden'; document.getElementById("stopNorth").style.height = '0px'; } document.getElementById("version").innerHTML = version; setOverlayDiv();
+
+  document.getElementById("title").innerHTML = name.substring(0, 20);
+  document.title = name.substring(0, 20) + " (rotcctlGUI)";
+});

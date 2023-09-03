@@ -367,21 +367,18 @@ function replyGetPos(buffer){
     if (target > 180)  {target  -=2*main.config.stop;}
     
     // Check for target or  errors
-    if ( (status.motor != "S" ) &&
-      // Stop position reached
-      ( status.azimuth == main.config.stop ) ||
-
-      // near target
-      (Math.abs(status.azimuth - status.target) < main.config.error) ||
-
-      // target overshot
-      (current > target && status.motor == "CW") ||
-      (current < target && status.motor == "CCW") 
-    ) {
-      // stop motor and inform target has been reached
-      turn("S");
-      status.target = null;
-      main.onTarget();
+    if ( (status.motor != "S" && status.target != null) &&
+         ( ( status.azimuth == main.config.stop ) ||                               // Stop position reached
+           (Math.abs(status.azimuth - status.target) < main.config.error) ||       // near target
+           (current > target && status.motor == "CW") ||
+           (current < target && status.motor == "CCW")                             // target overshot 
+   
+         )
+      ) {
+         // stop motor and inform target has been reached
+         turn("S");
+         status.target = null;
+         main.onTarget();
     }
 
     // Valid response detected

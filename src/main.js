@@ -1,12 +1,9 @@
-const { app, BrowserWindow } = require('electron')
-const { ipcMain }            = require('electron'); 
-const { globalEmitter }      = require('./node_events.js');
+const { app, BrowserWindow,ipcMain, dialog } = require('electron')
+//const { globalEmitter }                      = require('./node_events.js');
+const myClasses                        = require('./myclasses.js');
 const path                   = require('path')
 const rotctlProtocol         = require('./rotctlProtocol.js');
 const configFile             = require('./configFile.js');
-const { dialog }             = require('electron')
-let myClasses                = require('./myclasses.js');
-const { config } = require('process');
 
 
 const configuration = new myClasses.config();
@@ -16,7 +13,7 @@ exports.config = configuration;
 let mainWin;
 let winCFG;
 
-const VERSION = "0.9"
+const VERSION = "0.www9"
 
 readConfiguration();
 
@@ -29,7 +26,7 @@ readConfiguration();
 //TODO help (punta su github)
 // todo: disattivare scrolling
 // todo: la config deve essere modale
-
+// todo: manca la versione per bene
 
 const createWinMAIN = () => {
   mainWin = new BrowserWindow({
@@ -40,7 +37,7 @@ const createWinMAIN = () => {
     menuBarVisible:false,
     icon: 'icon.png',
     fullscreenable: false,
-    webPreferences: { preload: path.join(__dirname, 'gui/compass/js/ipc-render-main.js')
+    webPreferences: { preload: path.join(__dirname, 'gui/compass/js/preload_compass.js')
     }
   })
 
@@ -48,9 +45,7 @@ const createWinMAIN = () => {
   mainWin.webContents.on('did-finish-load',() => {
 
     rotctlProtocol.connect(); 
-    mainWin.webContents.send('main_tx_title',configuration.name.substring(0,20));
-    mainWin.webContents.send('main_tx_stop',configuration.stop);
-    mainWin.webContents.send('main_tx_version',"rotctlGUI ver. " + VERSION);
+    mainWin.webContents.send('main_tx_misc',configuration.name,configuration.stop,VERSION);
   });
 }
 
