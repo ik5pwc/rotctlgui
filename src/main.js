@@ -11,6 +11,8 @@ const { config } = require('process');
 
 const configuration = new myClasses.config();
 
+exports.config = configuration;
+
 let mainWin;
 let winCFG;
 
@@ -108,21 +110,19 @@ function readConfiguration() {
   configFile.readConfigFile(app.getPath('appData')+"/rotctlGUI/default.json",configuration);
   
   // Export configuration to network connection module
-  rotctlProtocol.setConfig(configuration);
+  //rotctlProtocol.setConfig(configuration);
 }
 
 
 /* -------------------------- */
 /*       Event Receivers      */
 /* -------------------------- */
-/* Route Events from rotctlProtocol to main window */
-globalEmitter.on('rotctlProtocol_tx_conn', (value)    => {mainWin.webContents.send('main_tx_conn',value); });
-globalEmitter.on('rotctlProtocol_tx_azimuth', (value) => {mainWin.webContents.send('main_tx_azimuth',value);});
-globalEmitter.on('rotctlProtocol_tx_onTarget',(value) => {mainWin.webContents.send('main_tx_target',value);});
 
-/* Route Events from main window to main window */
 exports.isConnected    = function (conn)  {mainWin.webContents.send('main_tx_conn',conn);};
+exports.curAzimuth     = function (az)    {mainWin.webContents.send('main_tx_azimuth',az);};
+exports.onTarget       = function ()      {mainWin.webContents.send('main_tx_target');};
 
+/* Route Events received from main window */
 ipcMain.on('main_rx_target',(event, value)    => {rotctlProtocol.setTarget(value);});
 ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});
 ipcMain.on('main_rx_stopMotor',(event)        => {rotctlProtocol.stop();});

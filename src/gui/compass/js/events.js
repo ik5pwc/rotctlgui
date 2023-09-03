@@ -142,7 +142,7 @@ function compassRightClick() {
 */
 function releaseButton(obj){ 
   obj.classList.remove('push');
-  window.electronAPI.compass_tx_stopMotor();
+  window.electronAPI.compass_tx_turn("S"); 
 }
 
 

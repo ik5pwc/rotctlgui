@@ -10,44 +10,17 @@
 
 /* --------------------- Required modules --------------------- */
 const Net               = require('node:net'); 
-//const { globalEmitter } = require('./node_events.js');
 const myClasses         = require('./myclasses.js');
-const main              =require ('./main.js');
-//const mainModule = require ('parent-module');
-//import parentModule from 'parent-module';
+const main              = require ('./main.js');
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                              Global objects                                               /*
 /* --------------------------------------------------------------------------------------------------------- */
 
 
-const client = new Net.Socket();      // TCP Socket
-const config = new myClasses.config;  // Configuration
-/*
-const rotctld = {                     // ROTCTLD network information 
-  host     : "" ,                     // FQDN or ip address - default: localhost
-  port     : 0,                       // ROTCTLD listen port - default: 4533
-  polling  : 10000,                   // Polling rate for position (ms) - default 500 ms
-  minSkew  : 30,                      // minimum difference to start rotation   
-  southStop: true,                    // Rotator has south stop or north stop. 
-  moveTo   : false                    // Rotator support "P" command.  i.e. Rotator support a "point to " manage hitself
-                                      // If true, than rotctld will simply tell to Rotator "move to XXX degree" the
-                                      // rotator will exactly move to required destination
-                                      // If false, then rotctlGUI will turn motor CW or CCW and stop when it reach required
-                                      // destination. Leave it to false in doubt.   
-};
-*/
-const status = {            // Manage rotctl protocol and store rotor configuration
-  sent        :[],             // list of sent commands (FIFO)                     
-  rxBuffer    : "",            // Received data from rotCTLD
-  target      : null,          // Target value requested from GUI (0 ... 360)
-  azimuth     : null,          // current azimuth (0 ... 360)
-  targetSouth : null,          // target when south stop (-180 ... 180)
-  azimuthSouth: null,          // current  azimut when south stop (-180 ... 180)
-  motor       : "S",           // Motor status
-  connected   : false,         // turn to true after verify connection
-  errors      : 0              // Communication error
-};
+const client = new Net.Socket();                 // TCP Socket
+const status = new myClasses.protocolStatus();   // protocol-related informations
+
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                            Exported Functions                                             /*
@@ -55,23 +28,9 @@ const status = {            // Manage rotctl protocol and store rotor configurat
 
 exports.connect      = connect;
 exports.setTarget    = setTarget;
-exports.stop         = stop;
+//exports.stop         = stop;
 exports.turn         = turn;
-/*exports.setAddress   = function (address) {rotctld.host = address;};
-exports.setPort      = function (port)    {rotctld.port = port;};
-exports.setPolling   = function (rate)    {rotctld.polling = rate;};
-exports.setminSkew   = function (skew)    {rotctld.minSkew = skew;};
-exports.setSouthStop = function (stop)    {rotctld.southStop = stop;};
-exports.setMoveTo    = function (moveTo)  {rotctld.moveTo = moveTo;};
-*/
-exports.setConfig    = function (fromMain) {
-  config.address = fromMain.address;
-  config.port = fromMain.port;
-  config.polling = fromMain.polling;
-  config.error = fromMain.error;
-  config.stop = fromMain.stop;
-  config.moveTo = fromMain.moveTo;
-}
+
 
 
 /*------------------------------------------------------
@@ -84,54 +43,44 @@ exports.setConfig    = function (fromMain) {
  *
  * Called Sub/Functions: 
  * . sendCommand            (rotctlProtocol.js)
+ * . turn                   (rotctlProtocol.js)
+ * . stopMotor              (rotctlProtocol.js)
  *
  * Global variables used: 
  * . status                 (rotctlProtocol.js)
- * . rotctld                (rotctlProtocol.js)
- * . globalEmitter          (node_events.js)
+ * . main.config            (main.js)
  *
  * Arguments:
  * . target: pointer to configuration structure managing all configuration states
 */
 function setTarget(target) {
-  console.log("Pointing to " + target);
-  status.target = parseInt(target);
+  let current = status.azimuth;   // copy of current pointing
+  let motor = "S"                 // set current motor status as STOP
 
-  if (rotctld.southStop === true && target > 180) {status.targetSouth = target - 360;} else {status.targetSouth = target;}
+  console.log("Pointing to " + target);
+  
+  // Store target in global status
+  status.target = parseInt(target);
+  
   // check target > minSkew
-  if (Math.abs(status.azimuth - status.target) < rotctld.minSkew) {
+  if (Math.abs(status.azimuth - status.target) < main.config.error) {
     // target near to current azimuth, report as done
-    globalEmitter.emit('rotctlProtocol_tx_onTarget');    
-    status.motor = "S";
+    main.onTarget(); 
+    turn("S");
 
   } else {
-    switch (rotctld.southStop) {
-      case true:
-        if ( (status.target/180 <1 && status.azimuth/180 <1) ||  (status.target/180 >1 && status.azimuth/180 >1)) {
-          // both target and current position are in the same "half" (0-180 / 180-360)
-          if ( status.target > status.azimuth) { status.motor = "CW";} else { status.motor = "CCW";}
-        } else {
-          if ( status.target > status.azimuth) { status.motor = "CCW";} else { status.motor = "CW";}
-        }
-        break;
-
-      case false:
-        if ( status.target > status.azimuth) { status.motor = "CW";} else { status.motor = "CCW";}
-        break;
-
-      case null:
-        // Rotor support "P" command 
+    if (main.config.moveTo == 'Y') {
+        // Rotor support "P" command, all job is performed by rotctld
         status.motor = "P"
-        break;
+        sendCommand("+P " + status.target + ".0 0.0") 
+    } else {
+      // Manage values when stop is at 180
+      if (target > 180)  {target -= 2*main.config.stop;} 
+      if (current > 180) {current -= 2*main.config.stop;} 
+      
+      // now that target and current have been properly scaled, check turn direction
+      if (target < current) {turn ("CCW")} else {turn ("CW");}
     }
-  }
-  
-  // Send appropriate command to rotctld
-  switch (status.motor){
-    case "CW" : sendCommand("+M 16 0")                       ; break;
-    case "CCW": sendCommand("+M 8 0")                        ; break;
-    case "S"  : sendCommand("+S")                            ; break;
-    case "P"  : sendCommand("+P " + status.target + ".0 0.0"); break;
   }
 }
 
@@ -149,18 +98,19 @@ function setTarget(target) {
  *
  * Global variables used: 
  * . client                 (rotctlProtocol.js)
+ * . main.config            (main.js)
  *
  * Arguments: NONE
 */
 function connect() {
-  console.log("Starting connection to " + config.address + ":" + config.port);
+  console.log("Starting connection to " + main.config.address + ":" + main.config.port);
   
   // Generic connection parameters
   client.setKeepAlive = true;
   client.setTimeout = 2000;
 
   // Start Connection
-  client.connect({ port: config.port, host: config.address },undefined);
+  client.connect({ port: main.config.port, host: main.config.address },undefined);
 }
 
 
@@ -171,7 +121,7 @@ function connect() {
  * Immediatly stop motor 
  *
  * Invoked by:
- * . startup                (main.js)
+ * . event emitter          (main.js)
  *
  * Called Sub/Functions: 
  * . sendCommand            (rotctlProtocol.js)
@@ -179,42 +129,51 @@ function connect() {
  * Global variables used: NONE
  *
  * Arguments: NONE
-*/
+
 function stop() {
   console.log("Stopping motor");
   
   // Generic connection parameters
   sendCommand("+S");
 }
+*/
 
 
 
 /*------------------------------------------------------
  * Function: turn
  * -------------------------------
- * rotate motor CW or CCW
+ * rotate motor CW or CCW or stop it
  *
  * Invoked by:
- * . startup                (main.js)
+ * . event emitter          (main.js)
  *
  * Called Sub/Functions: 
  * . sendCommand            (rotctlProtocol.js)
+ * . setTarget              (rotctlProtocol.js)
  *
  * Global variables used: NONE
  *
  * Arguments: 
- * . direction: can be CW or CCW 
+ * . direction: can be CW or CCW or S to sopr motor
 */
 function turn(direction) {
   switch (direction) {
     case "CW":
       console.log("Turning rotor CW");
       sendCommand("+M 16 0");
+      status.motor = "CW";
       break;
     case "CCW":
-    console.log("Turning rotor CCW");
-    sendCommand("+M 8 0");
-    break;
+      console.log("Turning rotor CCW");
+      sendCommand("+M 8 0");
+      status.motor = "CCW";
+      break;
+    case "S":
+      console.log("Stopping motor");
+      sendCommand("+S");
+      status.motor = "S";
+      break;
   }
 }
 
@@ -225,7 +184,7 @@ function turn(direction) {
 /* --------------------------------------------------------------------------------------------------------- */
 
 /*------------------------------------------------------
- * Function: getAzimuth
+ * Function: pollAzimuth
  * -------------------------------
  * Periodic function to ask for current position
  *
@@ -240,9 +199,9 @@ function turn(direction) {
  * 
  * Arguments: NONE
 */
-function getAzimuth () {
+function pollAzimuth () {
   if (status.connected) {sendCommand("+p");}
-  setTimeout(()=>{getAzimuth()},config.polling);
+  setTimeout(()=>{pollAzimuth()},main.config.polling);
 }
 
 
@@ -254,7 +213,7 @@ function getAzimuth () {
  *
  * Invoked by:
  * . hEstablished           (rotctlProtocol.js)
- * . getAzimuth             (rotctlProtocol.js)
+ * . pollAzimuth            (rotctlProtocol.js)
  * . setTarget              (rotctlProtocol.js)
  *
  * Called Sub/Functions: NONE
@@ -276,12 +235,12 @@ function sendCommand(cmd) {
 
 
 
-/*------------------------------------------------------
+/*------------------------------------------------------sendCommand(
  * Function: checkReply
  * -------------------------------
  * Evaluate replies to sent commands
  *
- * Invoked by:
+ * Invoked by:sendCommand(
  * . hdata                  (rotctlProtocol.js)
  *
  * Called Sub/Functions: 
@@ -345,7 +304,7 @@ function replySetPos(buffer) {
  * . checkReply             (rotctlProtocol.js)
  *
  * Called Sub/Functions: 
- * . getAzimuth             (rotctlProtocol.js) 
+ * . pollAzimuth            (rotctlProtocol.js) 
  * . globalEmitter          (node_events.js)
  * 
  * Global variables used: NONE
@@ -361,7 +320,7 @@ function replyCapabilities(buffer) {
     console.log("Rotator model: " + model[1]);
     status.connected = true;                            // update connection status
     main.isConnected(true);                             // inform GUI about status
-    getAzimuth();                                       // Start polling
+    pollAzimuth();                                      // Start polling
 
     // Valid response detected
     return true;
@@ -381,7 +340,6 @@ function replyCapabilities(buffer) {
  * . checkReply             (rotctlProtocol.js)
  *
  * Called Sub/Functions: 
- * . getAzimuth             (rotctlProtocol.js) 
  * . sendCommand            (rotctlProtocol.js)
  * . globalEmitter          (node_events.js)
  * 
@@ -392,34 +350,38 @@ function replyCapabilities(buffer) {
  * . buffer: string containing reply to be evaluated
 */
 function replyGetPos(buffer){
+  let target = status.target;     // Target and current position used
+  let current = 0;                // to perform calculation without altering "master value" 
+  
   // Message format
   let replyPos = buffer.match('get_pos:\nAzimuth: (-?[0-9]{1,})\.[0-9]{2}\nElevation: [0-9]{1,}\.[0-9]{2}\n');
   
   if (replyPos != undefined) {
     // Save value and send event to main application
     status.azimuth = replyPos[1];
-    if (rotctld.southStop === true && status.azimuth > 180) {status.azimuthSouth = status.azimuth - 360;} else {status.azimuthSouth = status.azimuth;} 
-    globalEmitter.emit('rotctlProtocol_tx_azimuth',status.azimuth);
+    current = status.azimuth;
+    main.curAzimuth(status.azimuth);
 
+    // Computer target and azimuth based on "stop"
+    if (current > 180) {current -=2*main.config.stop;}
+    if (target > 180)  {target  -=2*main.config.stop;}
+    
     // Check for target or  errors
     if ( (status.motor != "S" ) &&
+      // Stop position reached
+      ( status.azimuth == main.config.stop ) ||
 
-         // Stop position reached
-         (rotctld.southStop === false && status.azimuth == 0)  ||   
-         (rotctld.southStop === true  && status.azimuth == 180) ||
+      // near target
+      (Math.abs(status.azimuth - status.target) < main.config.error) ||
 
-         // North stop rotor, target has been outdated
-         (rotctld.southStop === false && status.motor == "CW" && status.azimuth > status.target)  ||
-         (rotctld.southStop === false && status.motor == "CCW" && status.azimuth < status.target) ||
-
-         // South stop rotor, target outdated
-         (rotctld.southStop === true  && status.motor == "CW" && status.azimuthSouth > status.targetSouth)  || // target has been outdated (CW)
-         (rotctld.southStop === true  && status.motor == "CCW" && status.azimuthSouth < status.targetSouth)) { // target has been outdated (CW)
-        
-        sendCommand("+S");
-        status.target = null;
-        status.motor = "S";
-        globalEmitter.emit('rotctlProtocol_tx_onTarget');
+      // target overshot
+      (current > target && status.motor == "CW") ||
+      (current < target && status.motor == "CCW") 
+    ) {
+      // stop motor and inform target has been reached
+      turn("S");
+      status.target = null;
+      main.onTarget();
     }
 
     // Valid response detected
@@ -455,7 +417,7 @@ client.on('end',      () => {hClosed()});
 
 /* Connection event handlers */
 client.on("connect",  () => {
-  console.log("Connected to " + rotctld.host + ": " + rotctld.port + " . Verify rotctld instance..")
+  console.log("Connected to " + main.config.address + ": " + main.config.port + " . Verify rotctld instance..")
 
   // Send basic command to verify we're connected to a rotctld instance
   sendCommand("1");

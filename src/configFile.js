@@ -118,7 +118,7 @@ function readConfigFile(file,config) {
   config.polling = JSONConfig.polling;
   config.error   = JSONConfig.max_degree_error;
   config.stop    = JSONConfig.stop;
-  config.moveTo  = JSONConfig.port;
+  config.moveTo  = JSONConfig.move_to_supported;
   config.file    = path.basename(file);
   config.path    = path.dirname(file);
 }

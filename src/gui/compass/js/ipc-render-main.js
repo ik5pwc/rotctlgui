@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   compass_rx_version:      (callback) => ipcRenderer.on('main_tx_version',(callback)),
   compass_rx_stop:         (callback) => ipcRenderer.on('main_tx_stop',(callback)),
   compass_tx_target:       (az)       => ipcRenderer.send('main_rx_target',az),
-  compass_tx_stopMotor:    ()         => ipcRenderer.send('main_rx_stopMotor'),
+//  compass_tx_stopMotor:    ()         => ipcRenderer.send('main_rx_stopMotor'),
   compass_tx_turn:         (dir)      => ipcRenderer.send('main_rx_turn',dir)
 })
  
