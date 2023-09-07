@@ -281,13 +281,11 @@ window.electronAPI.compass_rx_target((_event) => {
 */
 window.electronAPI.compass_rx_misc((_event, name, stop, version) => {
   // version
-  console.log(document.getElementById("version").innerHTML);
   document.getElementById("version").innerHTML = "rotctlGUI v. " + version.toString() ;
-  console.log(document.getElementById("version").innerHTML);
   setOverlayDiv();
 
   if (stop === 0) { document.getElementById("stopSouth").style.visibility = 'hidden'; document.getElementById("stopSouth").style.height = '0px'; }
-  else { document.getElementById("stopNorth").style.visibility = 'hidden'; document.getElementById("stopNorth").style.height = '0px'; } document.getElementById("version").innerHTML = version; setOverlayDiv();
+  else { document.getElementById("stopNorth").style.visibility = 'hidden'; document.getElementById("stopNorth").style.height = '0px'; } ;
 
   document.getElementById("title").innerHTML = name.substring(0, 20);
   document.title = name.substring(0, 20) + " (rotcctlGUI)";

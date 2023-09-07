@@ -8,14 +8,19 @@
  * ---------------------------------------------------------------------------------------
 */
 
- // include the ipc module to communicate with main process.
- const { contextBridge, ipcRenderer } = require('electron'); 
+// include the ipc module to communicate with main process.
+const { contextBridge, ipcRenderer } = require('electron'); 
+ //
+//const main              = require ('../../../main.js');
+
+console.log(parent);
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  config_rx_allconf:       (callback) => ipcRenderer.on('main_tx_allconf',(callback)),
-  config_tx_cancel:        ()         => ipcRenderer.send('main_rx_configCancel'),
-  config_tx_save:          (cfg)      => ipcRenderer.send('main_rx_configSave',cfg)
+  rx_main_allconf:   (callback) => ipcRenderer.on('tx_allconf',(callback)),
+  tx_cancel:         ()         => ipcRenderer.send('rx_config_cancel'),
+  config_tx_save:    (cfg)      => ipcRenderer.send('main_rx_configSave',cfg),
+  tx_getConfig:      ()         => ipcRenderer.send('main_rx_config_getConfig')
   /*
   compass_rx_version:      (callback) => ipcRenderer.on('main_tx_version',(callback)),
   compass_rx_stop:         (callback) => ipcRenderer.on('main_tx_stop',(callback)),

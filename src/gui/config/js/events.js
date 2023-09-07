@@ -37,16 +37,16 @@
 */
 function addListeners() {
 
-  document.getElementById("port").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById("polling").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById("error").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('name').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('filename').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('address').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('stopN').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('stopS').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('rotctlgui').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('hamlib').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById("port").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById("polling").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById("error").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById('name').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById('filename').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById('address').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById('stopN').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById('stopS').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById('rotctlgui').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
+  //document.getElementById('hamlib').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
   document.getElementById('cancel').addEventListener("click",(ev) => {window.electronAPI.config_tx_cancel();});
   document.getElementById('save').addEventListener("click",(ev) => {save(ev.srcElement);});
 
@@ -74,9 +74,8 @@ function addListeners() {
  * . save                  (gui/config/config.html)
  * . control passed ia obj parameter
  *  
- * Arguments: 
- * . obj : DOM object raising the event
-*/
+ * Arguments:     window.electronAPI.tx_getConfig();
+ */
 function checkValues (obj) {
   let valid = null;    // Need a 3-state value. true removes error indicato, false enable error indicator and
                        // null leave error indicator as is (used when this function is applied to a field
@@ -86,20 +85,10 @@ function checkValues (obj) {
   // evaluate based on changed field 
   // fields having special restrictions 
   switch (obj.id) {
-    case 'port' : 
-      if (! isNaN (obj.value) && obj.value > 1024 && obj.value < 49151) {valid=true; } else {valid = false; }
-      //if (valid && obj.value != g_currentCFG.port)    {save=true; } 
-      break;    
-
-    case 'polling' : 
-      if (! isNaN (obj.value) && obj.value > 200 && obj.value < 9999)  {valid = true; } else {valid = false; }
-      //if (valid && obj.value != g_currentCFG.polling) {save = true;}
-      break;
-
-    case 'error' : 
-      if (! isNaN (obj.value) && obj.value < 20 && obj.value > 3) {valid=true; } else {valid = false; }
-      //if (valid && obj.value != g_currentCFG.error) {save=true}; 
-      break;  
+    case 'name'    : if (obj.value.length == 0) {valid = false;} else {valid = true;}
+    case 'port'    : if (! isNaN (obj.value) && obj.value > 1024 && obj.value < 49151) {valid=true; } else {valid = false; } ; break;    
+    case 'polling' : if (! isNaN (obj.value) && obj.value > 200 && obj.value < 9999)  {valid = true; } else {valid = false; }; break;
+    case 'error'   : if (! isNaN (obj.value) && obj.value < 20 && obj.value > 3) {valid=true; } else {valid = false; }       ; break;  
   }
 
   // Apply error formatting to invalid values
@@ -114,8 +103,8 @@ function checkValues (obj) {
          (document.getElementById('polling').value != g_currentCFG.polling )          ||
          (document.getElementById('error').value != g_currentCFG.error )              ||
          (document.getElementById('filename').value != g_currentCFG.file )            ||
-         (document.getElementById('stopS').checked && g_currentCFG.stop == 'N')       ||
-         (document.getElementById('stopN').checked && g_currentCFG.stop == 'S')       ||
+         (document.getElementById('stopS').checked && g_currentCFG.stop == 0)         ||
+         (document.getElementById('stopN').checked && g_currentCFG.stop == 180)       ||
          (document.getElementById('rotctlgui').cheked && g_currentCFG.moveTo == 'Y' ) ||
          (document.getElementById('hamlib').checked && g_currentCFG.moveTo == 'N' )   
        ) {save = true;}
@@ -135,7 +124,7 @@ function save(obj) {
     let stopAt; 
     let pCommand;
 
-    if (document.getElementById('stopN').checked ){stopAt = 'N';} else {stopAt = 'S';}
+    if (document.getElementById('stopN').checked ){stopAt = 0;} else {stopAt = 180;}
     if (document.getElementById('hamlib').checked ){pCommand = 'Y';} else {pCommand = 'N';}
                                         
     window.electronAPI.config_tx_save({ name   : document.getElementById('name').value ,
@@ -183,7 +172,7 @@ function save(obj) {
  * Arguments: NONE
 */
 
-window.electronAPI.config_rx_allconf((_event,array) => {
+window.electronAPI.rx_main_allconf((_event,array) => {
 
   g_currentCFG.name = array.name;
   document.getElementById("name").value = g_currentCFG.name;
@@ -201,7 +190,7 @@ window.electronAPI.config_rx_allconf((_event,array) => {
   document.getElementById("error").value = g_currentCFG.error;
 
   g_currentCFG.stop = array.stop;
-  if (array.stop == 'S') {document.getElementById("stopS").checked=true;} else {document.getElementById("stopN").checked=true;}
+  if (array.stop == 180) {document.getElementById("stopS").checked=true;} else {document.getElementById("stopN").checked=true;}
 
   g_currentCFG.moveTo = array.moveTo;
   if (array.moveTo == 'Y') {document.getElementById("hamlib").checked=true;} else {document.getElementById("rotctlgui").checked=true;}

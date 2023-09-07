@@ -9,9 +9,11 @@
     <script src="./js/events.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="./compass.css">
   </head>
-
+  
   <body onload="startCompass();">
-
+    <div class="configure"  onclick="window.electronAPI.compass_tx_openConfig();">
+      <img id="configure" src="./configure.png" alt="configure rotctlGUI" /> 
+    </div>
     <div class="container">
       <div id="title" class="title">Rotator 1</div>
       <div class="containerStop" id="stopNorth">

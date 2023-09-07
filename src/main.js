@@ -1,6 +1,5 @@
 const { app, BrowserWindow,ipcMain, dialog } = require('electron')
-//const { globalEmitter }                      = require('./node_events.js');
-const myClasses                        = require('./myclasses.js');
+const myClasses              = require('./myclasses.js');
 const path                   = require('path')
 const rotctlProtocol         = require('./rotctlProtocol.js');
 const configFile             = require('./configFile.js');
@@ -13,7 +12,7 @@ exports.config = configuration;
 let mainWin;
 let winCFG;
 
-const VERSION = "0.www9"
+const VERSION = "0.9a"
 
 readConfiguration();
 
@@ -24,16 +23,15 @@ readConfiguration();
 // TODO: command line per prendere il nome del file di configurazione
 //TODO config help
 //TODO help (punta su github)
-// todo: disattivare scrolling
+
 // todo: la config deve essere modale
-// todo: manca la versione per bene
 
 const createWinMAIN = () => {
   mainWin = new BrowserWindow({
     width: 320,
     height: 365,
-    resizable: false,
-    autoHideMenuBar: false,
+    resizable: true,
+    autoHideMenuBar: true,
     menuBarVisible:false,
     icon: 'icon.png',
     fullscreenable: false,
@@ -42,9 +40,13 @@ const createWinMAIN = () => {
   })
 
   mainWin.loadFile('gui/compass/compass.html')
+  
   mainWin.webContents.on('did-finish-load',() => {
-
-    rotctlProtocol.connect(); 
+    
+    // mainWin.removeMenu();       // Remove standard menu 
+    rotctlProtocol.connect();     // start connection
+    
+    // send command to update window info
     mainWin.webContents.send('main_tx_misc',configuration.name,configuration.stop,VERSION);
   });
 }
@@ -59,41 +61,28 @@ const createWinCFG = () => {
     menuBarVisible:true,
     icon: 'i',
     fullscreenable: false,
-    webPreferences: { preload: path.join(__dirname, 'gui/config/js/ipc-render-main.js')}
+    webPreferences: { preload: path.join(__dirname, 'gui/config/js/preload_config.js')}
   })
   winCFG.loadFile('gui/config/config.html')
   
   winCFG.webContents.on('did-finish-load',()  => {
-    winCFG.send('main_tx_name',configFile.getName());
-    
-    winCFG.send('main_tx_allconf',{ name   : configFile.getName() ,
-                                    address: configFile.getAddress(),
-                                    port   : configFile.getPort(),
-                                    polling: configFile.getPolling(),
-                                    error  : configFile.getminSkew(),
-                                    stop   : configFile.getStop(),
-                                    moveTo : configFile.getMoveSupported(),
-                                    file   : configFile.getConfigFile(),
-                                    path : configFile.getConfigPath() 
-                                  }) 
-    /*
-    winCFG.send('main_tx_address',configFile.getAddress());
-    winCFG.send('main_tx_port',configFile.getPort());
-    winCFG.send('main_tx_polling',configFile.getPolling());
-    winCFG.send('main_tx_maxerror',configFile.getminSkew());
-    winCFG.send('main_tx_stop',configFile.getStop());
-    winCFG.send('main_tx_pcomman',configFile.getMoveSupported());
-    winCFG.send('main_tx_filename',configFile.getConfigFile());
-    winCFG.send('main_tx_filepath',configFile.getConfigPath());
-    */
-    /*config_rx_pcommand:      (callback) => ipcRenderer.on('main_tx_pcommand',(callback)),    
-    config_rx_filename:      (callback) => ipcRenderer.on('main_tx_filename',(callback))
-  */
+
+    // Send current configuration
+    winCFG.send('tx_allconf',{ name   : configuration.name,
+                               address: configuration.address,
+                               port   : configuration.port,
+                               polling: configuration.polling,
+                               error  : configuration.error,
+                               stop   : configuration.stop,
+                               moveTo : configuration.moveTo,
+                               file   : configuration.file,
+                               path   : configuration.path 
+                             }) 
   })
 }
 
 app.whenReady().then(() => { createWinMAIN()});
-//app.whenReady().then(() => { createWinCFG()});
+
 
 
 
@@ -109,20 +98,18 @@ function readConfiguration() {
 }
 
 
-/* -------------------------- */
-/*       Event Receivers      */
-/* -------------------------- */
 
+// "events" from rotctlProtocol dispatched to main window
 exports.isConnected    = function (conn)  {mainWin.webContents.send('main_tx_conn',conn);};
 exports.curAzimuth     = function (az)    {mainWin.webContents.send('main_tx_azimuth',az);};
 exports.onTarget       = function ()      {mainWin.webContents.send('main_tx_target');};
 
 /* Route Events received from main window */
-ipcMain.on('main_rx_target',(event, value)    => {rotctlProtocol.setTarget(value);});
-ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});
-ipcMain.on('main_rx_stopMotor',(event)        => {rotctlProtocol.stop();});
+ipcMain.on('main_rx_target',(event, value)    => {rotctlProtocol.setTarget(value);});  // user selected a targt
+ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});       // user ask for CW, CCW rotation or stop
+ipcMain.on('main_rx_openConfig',(event)       => {createWinCFG();});
 
-ipcMain.on('main_rx_configCancel',(event)     => {winCFG.close()});
+// Events from config window
+ipcMain.on('rx_config_cancel',(event)     => {winCFG.close()});
 ipcMain.on('main_rx_configSave',(event,cfg)   => {console.log(cfg)});  // prendere la nuova cfg, salvare il file, ricaricarla e fare la nuova connessione
-
 

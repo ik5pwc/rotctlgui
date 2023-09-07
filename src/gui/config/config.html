@@ -16,7 +16,10 @@
         <div class="cell label">Rotator Name</div>
       </div>
       <div class="row">
-        <div class="cell"><input style="text-align: center;" id="name" type="text" maxlength="20"></div>  
+        <div class="cell">
+          <input style="text-align: center;" id="name" type="text" maxlength="20" onkeyup="checkValues(this);">
+          <span class="tooltipError">Name is required</span>
+        </div>  
       </div>
     </div>
 
@@ -38,10 +41,10 @@
         </div>
 
         <div class="row">
-          <div class="cell"><input id="address" type="text" size="20"></div>
+          <div class="cell"><input id="address" type="text" size="20" onkeyup="checkValues(this);"></div>
           <div class="cell"><b>:</b>&nbsp;</div>
           <div class="cell">
-            <input type="text" size="5" maxlength="5" id="port">
+            <input type="text" size="5" maxlength="5" id="port"  onkeyup="checkValues(this);">
             <span class="tooltipError">Valid values:<br>1024 to 49151</span>
           </div>
         </div>
@@ -66,12 +69,12 @@
         </div>
         <div class="row">
           <div class="cell label">
-            <input type="text"  maxlength="4" id="polling"> &nbsp;milliseconds
+            <input type="text"  maxlength="4" id="polling" onkeyup="checkValues(this);"> &nbsp;milliseconds
             <span class="tooltipError">Valid values:<br>200 to 9999</span>
           </div>
           <div class="cell"></div>
           <div class="cell label">
-            <input type="text" maxlength="2" id="error" pattern="[0-9]+"> &nbsp;degrees
+            <input type="text" maxlength="2" id="error" pattern="[0-9]+" onkeyup="checkValues(this);"> &nbsp;degrees
             <span class="tooltipError">Valid values:<br>3 to 20</span>
           </div>
           <div class="cell"></div>
@@ -87,9 +90,9 @@
           <div class="cell label">SOUTH</div>
         </div>        
         <div class="row">
-          <div class="cell radiobutton"><input name="stop" id="stopN" type="radio" value="N"></div>
+          <div class="cell radiobutton"><input name="stop" id="stopN" type="radio" value="N" onchange="checkValues(this);"></div>
           <div class="cell"></div>
-          <div class="cell radiobutton"><input name="stop" id='stopS' type="radio" value="S"></div>
+          <div class="cell radiobutton"><input name="stop" id='stopS' type="radio" value="S" onchange="checkValues(this);"></div>
         </div>
       </div>
     </fieldset>
@@ -110,16 +113,16 @@
           <div class="cell label">Hamlib</div>
         </div>
         <div class="row">
-          <div class="cell"><input name="pcommand" id="rotctlgui" type="radio" value="Y" checked></div>
+          <div class="cell"><input name="pcommand" id="rotctlgui" type="radio" value="Y"  onchange="checkValues(this);"></div>
           <div class="cell"></div>
-          <div class="cell"><input name="pcommand" id="hamlib" type="radio" value="N"></div>
+          <div class="cell"><input name="pcommand" id="hamlib" type="radio" value="N" onchange="checkValues(this);"></div>
         </div>
       </div>
     </fieldset>
     <div class="table" style="margin-left:15px;margin-top:10px">
       <div class="row">
         <div class="cell label" style="text-align:left;">File name: &nbsp;</div>
-        <div class="cell"><input name="filename" id="filename" type="text"></div>
+        <div class="cell"><input name="filename" id="filename" type="text" onkeyup="checkValues(this);"></div>
       </div>
       <div class="row">
         <div class="cell label" style="padding-top:5px;">Location :</div>
@@ -128,8 +131,8 @@
     </div>
     <div class="table" id="buttons">
       <div class="row">
-        <div class="cell"><span class="button nosave" id="save">SAVE</span></div>
-        <div class="cell"><span class="button" id="cancel">cancel</span></div>
+        <div class="cell"><span class="button nosave" id="save" >SAVE</span></div>
+        <div class="cell"><span class="button" id="cancel" onclick="window.electronAPI.tx_cancel();">cancel</span></div>
       </div>
     </div>
   </body>
