@@ -16,21 +16,19 @@ const VERSION = "0.9a"
 
 readConfiguration();
 
-// todo: chiusura finestra di config dalla X cosa fa?
-// todo: config avviso valori modificati in chiusura
+// todo: quando esco dalla CFG (con la X o con cancel, warn nel caso ci siano valori da salvare)
 //TODO: protocol errors
 // TODO: logging avanzato
 // TODO: command line per prendere il nome del file di configurazione
 //TODO config help
 //TODO help (punta su github)
 
-// todo: la config deve essere modale
 
 const createWinMAIN = () => {
   mainWin = new BrowserWindow({
     width: 320,
     height: 365,
-    resizable: true,
+    resizable: false,
     autoHideMenuBar: true,
     menuBarVisible:false,
     icon: 'icon.png',
@@ -54,17 +52,21 @@ const createWinMAIN = () => {
 const createWinCFG = () => {
   winCFG = new BrowserWindow({
     frame: true,
-    width: 350,
-    height: 560,
+    width: 345,
+    height: 570,
     resizable: false,
     autoHideMenuBar: false,
+    parent: mainWin,
+    modal:true,
     menuBarVisible:true,
+    frame:false,
     icon: 'i',
     fullscreenable: false,
     webPreferences: { preload: path.join(__dirname, 'gui/config/js/preload_config.js')}
   })
-  winCFG.loadFile('gui/config/config.html')
   
+  winCFG.loadFile('gui/config/config.html')
+
   winCFG.webContents.on('did-finish-load',()  => {
 
     // Send current configuration
@@ -110,6 +112,5 @@ ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});
 ipcMain.on('main_rx_openConfig',(event)       => {createWinCFG();});
 
 // Events from config window
-ipcMain.on('rx_config_cancel',(event)     => {winCFG.close()});
-ipcMain.on('main_rx_configSave',(event,cfg)   => {console.log(cfg)});  // prendere la nuova cfg, salvare il file, ricaricarla e fare la nuova connessione
-
+ipcMain.on('rx_config_cancel',(event)         => {winCFG.close()});
+ipcMain.on('main_rx_configSave',(event,cfg)   => {console.log(cfg); })

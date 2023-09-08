@@ -9,51 +9,6 @@
 */
 
 
-/*------------------------------------------------------
- * Function: addListeners
- * -------------------------------
- * Attach listeners to HTML objects
- *
- * Invoked by:
- * . page onload           (gui/config/config.html)
- *
- * Called Sub/Functions: NONE
- *
- * Global variables used: NONE 
- * 
- * DOM items affected:
- * . port                  (gui/config/config.html)
- * . polling               (gui/config/config.html)
- * . error                 (gui/config/config.html)
- * . name                  (gui/config/config.html)
- * . filename              (gui/config/config.html)
- * . address               (gui/config/config.html)
- * . stopN                 (gui/config/config.html)
- * . stopS                 (gui/config/config.html)
- * . hamlib                (gui/config/config.html)
- * . rotctlgui             (gui/config/config.html)
- * 
- * Arguments: NONE
-*/
-function addListeners() {
-
-  //document.getElementById("port").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById("polling").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById("error").addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById('name').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById('filename').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById('address').addEventListener("keyup",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById('stopN').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById('stopS').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById('rotctlgui').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
-  //document.getElementById('hamlib').addEventListener("change",(ev) => {checkValues(ev.srcElement)});
-  document.getElementById('cancel').addEventListener("click",(ev) => {window.electronAPI.config_tx_cancel();});
-  document.getElementById('save').addEventListener("click",(ev) => {save(ev.srcElement);});
-
-}
-
-
-
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Event Handlers (from html)                                         /*
 /* --------------------------------------------------------------------------------------------------------- */
@@ -85,10 +40,20 @@ function checkValues (obj) {
   // evaluate based on changed field 
   // fields having special restrictions 
   switch (obj.id) {
-    case 'name'    : if (obj.value.length == 0) {valid = false;} else {valid = true;}
+    case 'name'    : if (obj.value.length == 0) {valid = false;} else {valid = true;}; break;
     case 'port'    : if (! isNaN (obj.value) && obj.value > 1024 && obj.value < 49151) {valid=true; } else {valid = false; } ; break;    
     case 'polling' : if (! isNaN (obj.value) && obj.value > 200 && obj.value < 9999)  {valid = true; } else {valid = false; }; break;
     case 'error'   : if (! isNaN (obj.value) && obj.value < 20 && obj.value > 3) {valid=true; } else {valid = false; }       ; break;  
+    case 'address' : 
+      if (obj.value.length == 0) {
+        valid = false;           // empty address field
+      } else {
+        let fqdn = obj.value.match(/^[a-z0-9]{1}[a-z0-9\-]{1,63}(\.[a-z0-9\-]{1,64}){0,}\.?$/i);
+
+        // Address field is not a name or an iP
+        if ( fqdn === undefined  &&   true  ) { valid = false;} else {valid = true;}
+      }
+      break;
   }
 
   // Apply error formatting to invalid values
@@ -112,14 +77,42 @@ function checkValues (obj) {
   }
 
   // enable/disable save button
-  if (save) {document.getElementById("save").classList.remove("nosave");} else {document.getElementById("save").classList.add("nosave");}  
+  if (save) {document.getElementById("save").classList.remove("nosave");} 
+  else      {document.getElementById("save").classList.add("nosave");}  
 }
 
 
-function save(obj) {
 
-  // Action is performed only if save button is enable
-  if ( ! obj.classList.contains("nosave")) {
+/*------------------------------------------------------
+ * Function: save
+ * -------------------------------
+ * When saving data, build associative array and pass
+ * to main process.
+ * 
+ * Invoked by:
+ * . DOM                        (gui/config/config.html)
+ *
+ * Called Sub/Functions: 
+ * .electronAPI.config_tx_save  (gui/config/js/preload_config.js)
+ *
+ * Global variables used: 
+ * . g_currentCFG               (gui/config/js/config.js)
+ * 
+ * DOM items affected:
+ * . name                       (gui/config/config.html)
+ * . address                    (gui/config/config.html)
+ * . port                       (gui/config/config.html)
+ * . polling                    (gui/config/config.html)
+ * . error                      (gui/config/config.html)
+ * . stopN                      (gui/config/config.html)
+ * . stopS                      (gui/config/config.html)
+ * . rotctlgui                  (gui/config/config.html)
+ * . hamlib                     (gui/config/config.html)
+ * 
+ *
+ * Arguments: NONE
+*/
+function save() {
     // compute special fields
     let stopAt; 
     let pCommand;
@@ -137,15 +130,15 @@ function save(obj) {
                                         file   : document.getElementById('filename').value,
                                         path   : document.getElementById('filepath').innerHTML
                                       })
-  }
 }
+
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Event Handlers (from node)                                         /*
 /* --------------------------------------------------------------------------------------------------------- */
 
 /*------------------------------------------------------
- * Multiple config_rx_allconf
+ * config_rx_allconf
  * -------------------------------
  * Populate GUI items with current configured values.
  * 

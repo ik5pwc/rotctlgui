@@ -8,9 +8,8 @@
     <link rel="stylesheet" type="text/css" href="./config.css">
   </head>
 
-  <body onload="addListeners()">
- 
-  
+  <body>
+    <div class="topbar">rotctlGUI configuration</div>
     <div class="table name">
       <div class="row">
         <div class="cell label">Rotator Name</div>
@@ -41,7 +40,10 @@
         </div>
 
         <div class="row">
-          <div class="cell"><input id="address" type="text" size="20" onkeyup="checkValues(this);"></div>
+          <div class="cell">
+            <input id="address" type="text" size="20" onkeyup="checkValues(this);">
+            <span class="tooltipError">Specify an IP address or a name</span>
+          </div>
           <div class="cell"><b>:</b>&nbsp;</div>
           <div class="cell">
             <input type="text" size="5" maxlength="5" id="port"  onkeyup="checkValues(this);">
@@ -131,9 +133,14 @@
     </div>
     <div class="table" id="buttons">
       <div class="row">
-        <div class="cell"><span class="button nosave" id="save" >SAVE</span></div>
+        <div class="cell"><span class="button nosave" id="save" onclick="if (! this.classList.contains('nosave')) {save()}">SAVE</span></div>
         <div class="cell"><span class="button" id="cancel" onclick="window.electronAPI.tx_cancel();">cancel</span></div>
       </div>
     </div>
   </body>
+  <script>
+
+
+
+  </script>
 </html>

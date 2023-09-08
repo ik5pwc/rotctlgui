@@ -173,8 +173,8 @@ body {
   position: absolute;
   width:min-content;
   height:min-content;
-  top:3px;
-  right:20px;
+  top:4px;
+  right:4px;
   z-index: 10;
 }
 

@@ -30,6 +30,7 @@ exports.connect      = connect;
 exports.setTarget    = setTarget;
 //exports.stop         = stop;
 exports.turn         = turn;
+exports.isIP         = Net.isIP;
 
 
 
@@ -446,7 +447,7 @@ client.on('data',(data) => {
 
 
 function hClosed(){
-  console.warn("Connection to " + config.address + ":" + config.port + " closed. Retry in 2 sec.")
+  console.warn("Connection to " + main.config.address + ":" + main.config.port + " closed. Retry in 2 sec.")
   
   // Notify GUI about disconnect
   main.isConnected(false);

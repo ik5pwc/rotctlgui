@@ -1,10 +1,30 @@
 body {
   background-color: #FFFFFF;
   margin:0;
-  padding: 0;
+  padding:0;
+  padding-bottom:20px;
   font-family: sans-serif;
+  overflow-x: hidden;
 }
 
+.topbar {
+  width: 100%;
+  height: 24px;
+  background-color: #686866;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  text-align: center;
+  /* padding-top: 5px; */
+  color: white;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  padding-top:6px;
+  -webkit-app-region : drag;
+}
+  
 ::-webkit-scrollbar {
   display: none;
 }
@@ -83,7 +103,7 @@ legend.advanced   { color: #c82cc5;  }
   text-align: center;
   margin-bottom: 10px;
   position: relative;
-  padding-top: 5px;
+  padding-top: 35px;
   padding-bottom: 5px;
   height:50px;
 }
@@ -145,6 +165,11 @@ input#error ~ .tooltipError {
   top:50px;
 }
 
+input#name ~  .tooltipError {
+  left:75px;
+  top: 85px;
+  width:140px;
+}
 
 .tooltipError {
   visibility: hidden;
