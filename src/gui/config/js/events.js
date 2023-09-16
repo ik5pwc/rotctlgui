@@ -41,6 +41,7 @@ function checkValues (obj) {
   // fields having special restrictions 
   switch (obj.id) {
     case 'name'    : if (obj.value.length == 0) {valid = false;} else {valid = true;}; break;
+    case 'filename': if (obj.value.length == 0) {valid = false;} else {valid = true;}; break;
     case 'port'    : if (! isNaN (obj.value) && obj.value > 1024 && obj.value < 49151) {valid=true; } else {valid = false; } ; break;    
     case 'polling' : if (! isNaN (obj.value) && obj.value > 200 && obj.value < 9999)  {valid = true; } else {valid = false; }; break;
     case 'error'   : if (! isNaN (obj.value) && obj.value < 20 && obj.value > 3) {valid=true; } else {valid = false; }       ; break;  
@@ -48,17 +49,17 @@ function checkValues (obj) {
       if (obj.value.length == 0) {
         valid = false;           // empty address field
       } else {
-        let fqdn = obj.value.match(/^[a-z0-9]{1}[a-z0-9\-]{1,63}(\.[a-z0-9\-]{1,64}){0,}\.?$/i);
+        let fqdnOrIp = obj.value.match(/^[a-z0-9]{1}[a-z0-9\-]{0,63}(\.[0-9a-z\-]{0,64}){0,}\.?$/i);
 
         // Address field is not a name or an iP
-        if ( fqdn === undefined  &&   true  ) { valid = false;} else {valid = true;}
+        if ( fqdnOrIp === null ) { valid = false;} else {valid = true;}
       }
       break;
   }
 
   // Apply error formatting to invalid values
-  if (valid == false) { obj.classList.add("error");    } 
-  if (valid == true ) { obj.classList.remove("error"); } 
+  if (valid == false) { obj.classList.add("invalid");    } 
+  if (valid == true ) { obj.classList.remove("invalid"); } 
 
   // Enable save if no error is present and at least one value has been modified
   if ( document.getElementsByClassName("error").length == 0 ) {

@@ -16,13 +16,16 @@ const VERSION = "0.9a"
 
 readConfiguration();
 
-// todo: quando esco dalla CFG (con la X o con cancel, warn nel caso ci siano valori da salvare)
+//TODO: quando esco dalla CFG (con la X o con cancel, warn nel caso ci siano valori da salvare)
+//TODO: posizione finestra di config
 //TODO: protocol errors
-// TODO: logging avanzato
-// TODO: command line per prendere il nome del file di configurazione
-//TODO config help
-//TODO help (punta su github)
-
+//TODO: logging avanzato
+//TODO: command line per prendere il nome del file di configurazione
+//TODO: config help
+//TODO: help (punta su github)
+//TODO: lingua in base alla lingua del sistema oppure forzata da cmdline
+//TODO: errore quando il nome file è vuoto
+//TODO: aprire la dialog per la directory
 
 const createWinMAIN = () => {
   mainWin = new BrowserWindow({

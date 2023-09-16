@@ -1,146 +1,142 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>rotctlGUI config</title>
-    <meta charset="utf-8">
-    <script src="./js/config.js" type="text/javascript"></script>
-    <script src="./js/events.js" type="text/javascript"></script>
-    <link rel="stylesheet" type="text/css" href="./config.css">
-  </head>
 
-  <body>
-    <div class="topbar">rotctlGUI configuration</div>
-    <div class="table name">
-      <div class="row">
-        <div class="cell label">Rotator Name</div>
-      </div>
-      <div class="row">
-        <div class="cell">
-          <input style="text-align: center;" id="name" type="text" maxlength="20" onkeyup="checkValues(this);">
-          <span class="tooltipError">Name is required</span>
-        </div>  
-      </div>
-    </div>
+<head>
+  <title>rotctlGUI config</title>
+  <meta charset="utf-8">
+  <script src="./js/config.js" type="text/javascript"></script>
+  <script src="./js/events.js" type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="./config.css">
+</head>
 
-    <!-- network configuration -->
-    <fieldset  class="network">
-      <legend class="network">Network</legend>
-      <div class="table description">
-        <div class="row">
-            <div class="cell explain">Computer where rotctld instance run</div>
-            <div class="cell help">?</div>
-        </div>
-      </div>
-     
-      <div class="table">
-        <div class="row">
-          <div class="cell label" >Name / IP address</div>
-          <div class="cell"></div>
-          <div class="cell label">TCP Port</div>
-        </div>
+<body>
+  <!-- this bar replaces the standard window decoration -->
+  <div class="topbar">rotctlGUI configuration</div>
+  
+  <!-- rotator name -->
+  <table>
+    <tr class="label"><td>Rotator Name</td></tr>
+    <tr class="input">
+      <td>
+        <input style="text-align: center;" id="name" type="text" maxlength="20" onkeyup="checkValues(this);">
+        <div class="tooltip invalidcfg">Name is required</div>
+      </td>
+    </tr>  
+  </table>
 
-        <div class="row">
-          <div class="cell">
-            <input id="address" type="text" size="20" onkeyup="checkValues(this);">
-            <span class="tooltipError">Specify an IP address or a name</span>
-          </div>
-          <div class="cell"><b>:</b>&nbsp;</div>
-          <div class="cell">
-            <input type="text" size="5" maxlength="5" id="port"  onkeyup="checkValues(this);">
-            <span class="tooltipError">Valid values:<br>1024 to 49151</span>
-          </div>
-        </div>
-      </div>
-    </fieldset>
-    
-    <!-- Rotator configuration -->
-    <fieldset class="rotator">
-      <legend class="rotator">Rotator</legend>
-      <div class="table description">
-        <div class="row">
-            <div class="cell explain">Rotator positioning behaviour</div>
-            <div class="cell help">?</div>
-        </div>
-      </div>
-      <div class="table" style="height: 50px;">
-        <div class="row">
-          <div class="cell label">Position polling</div>
-          <div class="cell"></div>
-          <div class="cell label">Target max error</div>
-          <div class="cell"></div>
-        </div>
-        <div class="row">
-          <div class="cell label">
-            <input type="text"  maxlength="4" id="polling" onkeyup="checkValues(this);"> &nbsp;milliseconds
-            <span class="tooltipError">Valid values:<br>200 to 9999</span>
-          </div>
-          <div class="cell"></div>
-          <div class="cell label">
-            <input type="text" maxlength="2" id="error" pattern="[0-9]+" onkeyup="checkValues(this);"> &nbsp;degrees
-            <span class="tooltipError">Valid values:<br>3 to 20</span>
-          </div>
-          <div class="cell"></div>
-        </div>
-      </div>
-      <div class="table">        
-        <div class="row">
-          <div class="cell" style="padding-top: 15px;">Rotator stops at:</div>
-        </div>
-        <div class="row">
-          <div class="cell label">NORTH</div>
-          <div class="cell"></div>
-          <div class="cell label">SOUTH</div>
-        </div>        
-        <div class="row">
-          <div class="cell radiobutton"><input name="stop" id="stopN" type="radio" value="N" onchange="checkValues(this);"></div>
-          <div class="cell"></div>
-          <div class="cell radiobutton"><input name="stop" id='stopS' type="radio" value="S" onchange="checkValues(this);"></div>
-        </div>
-      </div>
-    </fieldset>
+  <!-- network configuration -->
+  <fieldset class="network">
+    <legend class="network">Network</legend>
+    <p class="description">Computer where rotctld instance run</p>
+    <div class="help">?</div>
+    <table>
+      <tr class="label">
+        <td >Name / IP address</td>
+        <td>&nbsp;</td>
+        <td style="text-align: center;">TCP Port</td>
+      </tr>
+      <tr class="input">
+        <td>
+          <input id="address" type="text" size="20" onkeyup="checkValues(this);">
+          <span class="tooltip invalidcfg">Specify an IP address or a name</span>
+        </td>
+        <td><b>:</b></td>
+        <td>
+          <input type="text" size="5" maxlength="5" id="port" onkeyup="checkValues(this);">
+          <span class="tooltip invalidcfg">Valid values:<br>1024 to 49151</span>
+        </td>
+      </tr>      
+    </table>
+  </fieldset>
 
-    <!-- advanced configuration -->
-    <fieldset class="advanced">
-      <legend class="advanced">Advanced </legend>
-      <div class="table description">
-        <div class="row">
-            <div class="cell explain">Who handles "point to" command ?</div>
-            <div class="cell help">?</div>
-        </div>
-      </div>
-      <div class="table">
-        <div class="row">
-          <div class="cell label">rotctlGUI </div>
-          <div class="cell"></div>
-          <div class="cell label">Hamlib</div>
-        </div>
-        <div class="row">
-          <div class="cell"><input name="pcommand" id="rotctlgui" type="radio" value="Y"  onchange="checkValues(this);"></div>
-          <div class="cell"></div>
-          <div class="cell"><input name="pcommand" id="hamlib" type="radio" value="N" onchange="checkValues(this);"></div>
-        </div>
-      </div>
-    </fieldset>
-    <div class="table" style="margin-left:15px;margin-top:10px">
-      <div class="row">
-        <div class="cell label" style="text-align:left;">File name: &nbsp;</div>
-        <div class="cell"><input name="filename" id="filename" type="text" onkeyup="checkValues(this);"></div>
-      </div>
-      <div class="row">
-        <div class="cell label" style="padding-top:5px;">Location :</div>
-        <div class="cell label" id="filepath"></div>
-      </div>  
-    </div>
-    <div class="table" id="buttons">
-      <div class="row">
-        <div class="cell"><span class="button nosave" id="save" onclick="if (! this.classList.contains('nosave')) {save()}">SAVE</span></div>
-        <div class="cell"><span class="button" id="cancel" onclick="window.electronAPI.tx_cancel();">cancel</span></div>
-      </div>
-    </div>
-  </body>
-  <script>
+  <!-- Rotator configuration -->
+  <fieldset class="rotator">
+    <legend class="rotator">Rotator</legend>
+    <p class="description">Installation and positioning behaviour</p>
+    <div class="help">?</div>
 
+    <table>
+      <tr class="label">
+        <td >Position polling</td>
+        <td style="text-align: center;padding-left:75px">Max error to target</td>
+      </tr>
+      <tr class="input">
+        <td>
+          <input type="text" maxlength="4" id="polling" onkeyup="checkValues(this);"> &nbsp;milliseconds
+          <span class="tooltip invalidcfg">Valid values:<br>200 to 9999</span>
+        </td>
+        <td style="padding-left:70px">
+          <input type="text" maxlength="2" id="error" onkeyup="checkValues(this);"> &nbsp;degrees
+          <span class="tooltip invalidcfg">Valid values:<br>3 to 20</span>
+        </td>
+      </tr>      
+    </table>
 
+    <table style="margin-top:12px;">
+      <tr class="label">
+        <td >Rotator stops at:</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="radiobutton"><input name="stop" id="stopN" type="radio" value="N" onchange="checkValues(this);">NORTH</td>
+        <td class="radiobutton" style="padding-left:115px"><input name="stop" id="stopS" type="radio" value="Y" onchange="checkValues(this);">SOUTH</td>
+      </tr>
+    </table>
 
-  </script>
+  </fieldset>
+
+  <!-- advanced configuration -->
+  <fieldset class="advanced">
+    <legend class="advanced">Advanced</legend>
+
+    <p class="description">Installation and positioning behaviour</p>
+    <div class="help">?</div>
+
+    <table>
+      <tr>
+        <td class="radiobutton"><input name="pcommand" id="rotctlgui" type="radio" value="Y"  onchange="checkValues(this);">rotctlGUI</td>
+        <td class="radiobutton" style="padding-left:135px"><input name="pcommand" id="hamlib" type="radio" value="N"  onchange="checkValues(this);">Hamlib</td>
+      </tr>
+    </table>
+  </fieldset>
+
+  <!-- File box -->
+  <fieldset class="file">
+    <table>
+      <tr >
+        <td class="label input">File Name:</td>
+        <td>
+          <input name="filename" id="filename" type="text" onkeyup="checkValues(this);">
+          <span class="tooltip invalidcfg">Specify a file name</span>
+        </td>
+      </tr>
+      <tr >
+        <td class="label input">Located in:</td>
+        <td>
+          <span id="filepath"></span>
+          <span id="filepath_tooltip" class="tooltip path">/home/lc@civinini.home/.config/rotctlGUI</span>
+        </td>
+      </tr>
+    </table>
+  </fieldset>
+
+  <!-- buttons -->
+  <span class="button nosave" id="save" onclick="if (! this.classList.contains('nosave')) {save()}">SAVE</span>
+  <span class="button" id="cancel" onclick="window.electronAPI.tx_cancel();">cancel</span>
+  
+  <div class="tooltip help" id="help_network">
+    <p>
+      rotctlGUI works in tandem with a rotctld instance wherever it is located
+    </p>
+    <p>
+      <b>Name / IP adddress</b> is where rotctld runs. Use <i>localhost</i> if rotctld is on the same computer,
+      otherwise specify name (avoid using IP); append <i>.local</i> to computer name when both share the same network
+      (almost all modern OSes can manage <i>.local</i> name resolution).
+    </p>
+    <p>
+      <b>Port</b> allows locating rotctld among all processes running on a computer. If unsure, use default value 4533
+    </p>
+  </div>
+</body>
+
 </html>

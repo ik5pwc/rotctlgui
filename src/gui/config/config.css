@@ -1,11 +1,32 @@
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                            General page style                                                 */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* page common settings */
 body {
   background-color: #FFFFFF;
   margin:0;
   padding:0;
   padding-bottom:20px;
   font-family: sans-serif;
-  overflow-x: hidden;
+  overflow-x: hidden;  /* Avoid "scrolling" */
+  overflow-y: hidden;  /* Avoid "scrolling" */
 }
+
+/* special style to hide scrollbars */
+::-webkit-scrollbar {  display: none; }
+
+table {
+  border-spacing: 0px;
+  border: none;
+  border-collapse: collapse;
+  margin-top:5px;
+}
+
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                            Window topbar emulator                                             */ 
+/* ------------------------------------------------------------------------------------------------------------- */
 
 .topbar {
   width: 100%;
@@ -15,51 +36,53 @@ body {
   top: 0px;
   left: 0px;
   text-align: center;
-  /* padding-top: 5px; */
   color: white;
-  font-family: inherit;
   font-size: 12px;
   font-weight: bold;
   text-align: center;
   padding-top:6px;
-  -webkit-app-region : drag;
-}
-  
-::-webkit-scrollbar {
-  display: none;
+  -webkit-app-region : drag;   /* special effect to drag entire window using this bar */
 }
 
-/* Common fieldset settings */
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/* fieldsets are used to "group" similarowr settings together. There are 3 fieldsets (network, general, advanced)   */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* Common fieldset settings  */
 fieldset {
   border-radius: 10px;
   border-width: 1px;;
   position: relative; 
   margin-top:10px;
-  width:300px;
-  margin-left: 10px;
+  width:89%;
+  margin:auto;
+  margin-top:8px;
 }
 
-fieldset > legend {
-  font-size: 14px;
-  font-style: italic; 
-}
+/* fieldset legend (i.e. description "within the border" of grouped objects ) */
+fieldset > legend { font-size: 14px; font-style: italic; }
 
-/* Table emulator with DIV */
-.table {
-  width: inherit; 
-  display: table;
-  position: relative;
-}
-.row   {display: table-row; }
-.cell  {display: table-cell;}
-.description {top:-5px;}
+/* specific fieldset settings (network group) */
+fieldset.network  {border-color: #3f49d7; height:83px; }
+legend.network    {color: #3f49d7;}
 
-/* special "cells" */
-.explain {
-  font-size: 16px;
-  color: black;
-}
+/* specific fieldset settings (rotator behaviour group)*/
+fieldset.rotator  { height:130px;; border-color: #107508;}
+legend.rotator    { color: #107508;  }
 
+/* specific fieldset settings (advanced group) */
+fieldset.advanced { height:55px;; border-color: #c82cc5;}
+legend.advanced   { color: #c82cc5;  }
+
+/* specific fieldset for file */
+fieldset.file {border:none; margin-top:0px; margin-bottom:7px;}
+
+
+/* Additional styles for "table" used to describe specific section (i.e. fieldset) */
+.description {    display: inline; text-align: left;}
+
+/* ? icon */
 .help {
   font-weight: bolder;
   font-size:12px;
@@ -69,58 +92,69 @@ fieldset > legend {
   text-align: center;
   background: #3498db;
   color: white;
+  cursor: pointer;
+  display: inline;
+  position: fixed;
+  right: 20px;
 }
 
-.help:hover{cursor: pointer;}
 
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                    styles for tables containing settings                                      */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* specific style for each settings table */
 .label   {
+  white-space: nowrap;
   margin-top:0px;
   font-size: 12px;
-  color: #555555;
+  color: #333333;
   margin-bottom:3px;
   top:0px;
 }
 
-.radiobutton {
-  font-family: inherit;
+.input {
+  white-space: nowrap;
+  margin-top:0px;
   font-size: 12px;
-  padding-top:2px;
-  text-transform: uppercase;
+  color: #333333;
+  margin-bottom:3px;
+  height:30px;
 }
 
+.radiobutton { font-size: 12px; padding-top:5px; vertical-align: middle;}
 
-fieldset.network  {border-color: #3f49d7; height:80px;}
-legend.network    {color: #3f49d7;}
-
-fieldset.rotator  { height:150px;; border-color: #107508;}
-legend.rotator    { color: #107508;  }
-
-fieldset.advanced { height:65px;; border-color: #c82cc5;}
-legend.advanced   { color: #c82cc5;  }
-
-.name {
+/* custom style for rotator name table */
+.table.name {
   margin:auto;
   text-align: center;
-  margin-bottom: 10px;
   position: relative;
   padding-top: 35px;
   padding-bottom: 5px;
   height:50px;
 }
 
+div.topbar ~ table {
+  margin: auto;
+  margin-top: 40px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                         Style for HTML input fields                                           */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* common style for all input fields */
 input {
   border: none;
   border-bottom:1px solid green;
   font-size: 20px;
-  margin-top:5px;
+  margin-top:0px;
   color:green;
 }
 
-input#polling{width:50px;}
-input#error{width:25px;}
-input#address{width:215px;}
-input#port{width:60px;}
-
+/* style when input field has focus */
 input:focus {
   outline: none;
   border: 0px solid white;
@@ -129,68 +163,170 @@ input:focus {
   color:black;
 }
 
-input#filename {width:245px;margin-left:5px;}
-div#fullpath   {padding-left:5px;}
-
-
-input.error {
-  border-bottom:1px solid red;
+/* style when input field contains invalid data (class error applied when invalid data) */
+input.invalid {
+  border-bottom:3px solid red;
   color:red;
   position: relative;
   display: inline-block;
 }
 
+/* specific configuration for some input (identified by id) */
+input#stopN     {vertical-align: middle; margin-top: -2px;font-weight: bold;}
+input#stopS     {vertical-align: middle; margin-top: -2px;font-weight: bold;}
+input#hamlib    {vertical-align: middle; margin-top: -2px;font-weight: bold;}
+input#rotctlgui {vertical-align: middle; margin-top: -2px;font-weight: bold;}
+input#polling   {width:50px;text-align:center;}
+input#error     {width:25px;text-align:center;}
+input#address   {width:215px;}
+input#port      {width:60px;text-align:center;}
+input#filename  {width:228px;margin-left:5px;}
 
-.settings {
-  margin-top: 20px;
-  margin-left: 10px;
+
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                            Tooltips configuration                                             */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* Generic tooltip config */
+.tooltip {
+  visibility: hidden;     /* by default tooltip is hidden*/
+  border-radius: 6px;     /* border radius */
+  padding: 5px;           /* space between text and tooltip border */
+  position: fixed;        /* fixed position so it doesn't influence other elements */
+  z-index: 1;             /* need to be "over" other elements */
+  text-align: center;;
 }
 
-input#polling ~ .tooltipError {
-  left:-20px;
-  top:100%;
-  width:90px;
-}
-
-
-input#port ~ .tooltipError {
-  width: 90px;
-  left:220px;
-  top:50px;
-}
-
-input#error ~ .tooltipError {
-  width: 90px;
-  left:150px;
-  top:50px;
-}
-
-input#name ~  .tooltipError {
-  left:75px;
-  top: 85px;
-  width:140px;
-}
-
-.tooltipError {
-  visibility: hidden;
-  font-size:12px;
+/* invalid parameter tooltip */
+.invalidcfg  { 
   background-color: darkred;
   color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
+  font-size: 12px;
+}   
 
-  /* Position the tooltip */
+/* tooltip "arrow" above the error tooltip */
+.tooltip.invalidcfg::after {
+  content: "";
   position: absolute;
-  z-index: 1;
+  top: -10px;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent darkred transparent;
 }
 
-.error:hover ~ .tooltipError { visibility: visible; }
+/* help tooltip */
+.helptext    { 
+  background-color: khaki;  
+  color: black;
+  font-size: 14px;
+  text-align: justify;
+  padding:10px;
+  margin:auto;
+  width:90%;
+}
 
+/* location tooltip */
+.path  {                                                
+  background-color: khaki; 
+  opacity: 0.7;
+  color:black; 
+  padding-left:5px; 
+  padding-right:5px; 
+}   
+
+.tooltip.help { 
+  color: black;
+  background-color: khaki;
+  font-size: 14px;
+  text-align: justify;
+  padding:10px;
+  margin:auto;
+  width:90%;
+}
+
+
+/* tooltip enable events */
+.invalid:focus ~ .tooltip.tooltip.invalidcfg {display:inline; visibility: visible; }             /* For invalid settings, display on focus */
+span#filepath:hover ~ .tooltip.path {visibility: visible;}                                       /* for path is OK hover event */
+
+
+/* Error tooltip positioning */              
+input#name    ~  .tooltip.invalidcfg { left:102px; width:140px; top: 90px; }
+input#address ~  .tooltip.invalidcfg { left:20px ; width:210px; top:193px; }
+input#port    ~  .tooltip.invalidcfg { left:223px; width:110px; top:193px; } 
+input#polling ~  .tooltip.invalidcfg { left:8px;   width:70px;  top:300px  }
+input#error   ~  .tooltip.invalidcfg { left:182px; width:90px;  top:300px; }
+input#filename ~ .tooltip.invalidcfg { left:110px;  width:200px; top:480px; }
+span#filepath  ~ .tooltip.path  { left: 10px; width:max-content; top:500px;} 
+
+
+#help_network {top:110px;}
+.tooltip.help p {margin-top:0px;}
+
+/*
+border: 1px solid black;
+
+top: -40px;
+height: 0;
+visibility: visible;
+position: relative;
+margin: auto;
+overflow: hidden;
+display: ;
+/* padding: 0; */
+/* border: 0; */
+
+
+
+
+
+
+/*
+
+#help_network {
+  color: black;
+  background-color: khaki;
+  border-radius: 8px;
+  width: 275px;
+  margin-left: 10px;
+  position: absolute;
+  padding: 8px;
+  top: 100px;
+  font-size: 14px;
+  text-align: justify;
+}
+
+
+
+*/
+
+
+
+
+
+
+span#filepath {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 245px;
+  overflow: hidden;
+  display: block;
+  font-size: 12px;
+  margin-left:5px;
+}
+
+
+
+
+
+
+/* generic style configu for buttons */
 .button {
   appearance: none;
-  -webkit-appearance: none;
-  font-family: inherit;
+  /*-webkit-appearance: none;*/
   font-weight: bold;
   cursor: pointer;
   margin:10px;
@@ -205,20 +341,16 @@ input#name ~  .tooltipError {
   text-transform: uppercase;
 }
 
-#save.button { background: #2ecc71; }
-#save.button:hover { background: #27ae60; }
+/* special styles for save and cancel button both normal and hoovered */
+#save.button         { background: #2ecc71; margin-left:150px}     /* Save is enabled */
+#save.button:hover   { background: #27ae60; }                      /* Save is enabled, highlight the button on hover */
+#cancel.button       { background: #f1c40f; }                      /* normal Cancel button status */
+#cancel.button:hover { background: #f39c12; }                      /* Cancel button on hover */
 
-#cancel.button { background: #f1c40f;}
-#cancel.button:hover { background: #f39c12;}
-
-#buttons.table  {
-  margin-top:20px;
-  margin-left: 140px;
+/* save button not enabled, no change detected */
+#save.nosave, #save.nosave:hover {                                
+  cursor:default; 
+  color: lightgray; 
+  background-color: #66d193; 
 }
 
-#save.nosave { 
-  cursor:default;
-  color: lightgray;
-  background-color: #66d193;
-}
-#save.nosave:hover {background: #66d193;}
