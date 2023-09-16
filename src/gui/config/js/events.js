@@ -43,7 +43,7 @@ function checkValues (obj) {
     case 'name'    : if (obj.value.length == 0) {valid = false;} else {valid = true;}; break;
     case 'filename': if (obj.value.length == 0) {valid = false;} else {valid = true;}; break;
     case 'port'    : if (! isNaN (obj.value) && obj.value > 1024 && obj.value < 49151) {valid=true; } else {valid = false; } ; break;    
-    case 'polling' : if (! isNaN (obj.value) && obj.value > 200 && obj.value < 9999)  {valid = true; } else {valid = false; }; break;
+    case 'polling' : if (! isNaN (obj.value) && obj.value > 199 && obj.value < 5001)  {valid = true; } else {valid = false; }; break;
     case 'error'   : if (! isNaN (obj.value) && obj.value < 20 && obj.value > 3) {valid=true; } else {valid = false; }       ; break;  
     case 'address' : 
       if (obj.value.length == 0) {
@@ -113,7 +113,9 @@ function checkValues (obj) {
  *
  * Arguments: NONE
 */
-function save() {
+function btnSave(btn) {
+  // Save is performed only when something was changed
+  if ( ! btn.classList.contains('nosave')) {
     // compute special fields
     let stopAt; 
     let pCommand;
@@ -131,8 +133,76 @@ function save() {
                                         file   : document.getElementById('filename').value,
                                         path   : document.getElementById('filepath').innerHTML
                                       })
+  }
 }
 
+
+
+/*------------------------------------------------------
+ * Function: btnCancel
+ * -------------------------------
+ * Code executed when clicking cancel button
+ * 
+ * Invoked by:
+ * . DOM                         (gui/config/config.html)
+ *
+ * Called Sub/Functions: 
+ * .electronAPI.config_tx_cancel (gui/config/js/preload_config.js)
+ *
+ * Global variables used: NONE
+ * . g_currentCFG               (gui/config/js/config.js)
+ * 
+ * DOM items affected:
+ * . save                       (gui/config/config.html)
+ *
+ * Arguments: NONE
+*/
+function btnCancel () {
+  // CHeck if save button is enable
+  if (! document.getElementById("save").classList.contains("nosave") ) {
+    // Some setting was changed, ask for confirmation
+    if (!confirm("Discard changes? ") ) {return false;}
+  }
+  
+  // Invoke window close (if not aborted before)
+  window.electronAPI.tx_cancel();
+}
+
+
+
+/*------------------------------------------------------
+ * Function:  switchHelp
+ * -------------------------------
+ * Close or switch help on/offWhen saving data, build associative array and pass
+ * to main process.
+ * 
+ * Invoked by:
+ * . DOM                        (gui/config/config.html)
+ *
+ * Called Sub/Functions: 
+ * .electronAPI.config_tx_save  (gui/config/js/preload_config.js)
+ *
+ * Global variables used: 
+ * . g_currentCFG               (gui/config/js/config.js)
+ * 
+ * DOM items affected:
+ * . name                       (gui/config/config.html)
+ * . address                    (gui/config/config.html)
+ * . port                       (gui/config/config.html)
+ * . polling                    (gui/config/config.html)
+ * . error                      (gui/config/config.html)
+ * . stopN                      (gui/config/config.html)
+ * . stopS                      (gui/config/config.html)
+ * . rotctlgui                  (gui/config/config.html)
+ * . hamlib                     (gui/config/config.html)
+ * 
+ *
+ * Arguments: NONE
+*/
+function switchHelp (help) {
+  let id = document.getElementById(help);
+  if ( id.classList.contains("hidden") ) {id.classList.remove("hidden"); } else {id.classList.add("hidden");}
+}
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Event Handlers (from node)                                         /*

@@ -28,7 +28,7 @@
   <fieldset class="network">
     <legend class="network">Network</legend>
     <p class="description">Computer where rotctld instance run</p>
-    <div class="help">?</div>
+    <div class="help" onclick="switchHelp('helpNetwork');">?</div>
     <table>
       <tr class="label">
         <td >Name / IP address</td>
@@ -53,7 +53,7 @@
   <fieldset class="rotator">
     <legend class="rotator">Rotator</legend>
     <p class="description">Installation and positioning behaviour</p>
-    <div class="help">?</div>
+    <div class="help" onclick="switchHelp('helpRotator1');switchHelp('helpRotator2')">?</div>
 
     <table>
       <tr class="label">
@@ -63,7 +63,7 @@
       <tr class="input">
         <td>
           <input type="text" maxlength="4" id="polling" onkeyup="checkValues(this);"> &nbsp;milliseconds
-          <span class="tooltip invalidcfg">Valid values:<br>200 to 9999</span>
+          <span class="tooltip invalidcfg">Valid values:<br>200 to 5000</span>
         </td>
         <td style="padding-left:70px">
           <input type="text" maxlength="2" id="error" onkeyup="checkValues(this);"> &nbsp;degrees
@@ -88,10 +88,8 @@
   <!-- advanced configuration -->
   <fieldset class="advanced">
     <legend class="advanced">Advanced</legend>
-
-    <p class="description">Installation and positioning behaviour</p>
-    <div class="help">?</div>
-
+    <p class="description">Who manage the "point to" command?</p>
+    <div class="help" onclick="switchHelp('helpAdvanced');">?</div>
     <table>
       <tr>
         <td class="radiobutton"><input name="pcommand" id="rotctlgui" type="radio" value="Y"  onchange="checkValues(this);">rotctlGUI</td>
@@ -121,12 +119,15 @@
   </fieldset>
 
   <!-- buttons -->
-  <span class="button nosave" id="save" onclick="if (! this.classList.contains('nosave')) {save()}">SAVE</span>
-  <span class="button" id="cancel" onclick="window.electronAPI.tx_cancel();">cancel</span>
+  <span class="button nosave" id="save" onclick="btnSave(this)">SAVE</span>
+  <span class="button" id="cancel" onclick="btnCancel()">cancel</span>
   
-  <div class="tooltip help" id="help_network">
+  <!-- Help for network -->
+
+  <!-- Help for advanced  -->
+  <div class="tooltip helptext hidden" id="helpNetwork">
     <p>
-      rotctlGUI works in tandem with a rotctld instance wherever it is located
+      rotctlGUI works in tandem with a rotctld instance wherever it is located.
     </p>
     <p>
       <b>Name / IP adddress</b> is where rotctld runs. Use <i>localhost</i> if rotctld is on the same computer,
@@ -134,9 +135,41 @@
       (almost all modern OSes can manage <i>.local</i> name resolution).
     </p>
     <p>
-      <b>Port</b> allows locating rotctld among all processes running on a computer. If unsure, use default value 4533
+      <b>Port</b> allows locating rotctld among all processes running on a computer. If unsure, use default value 4533.
     </p>
+    <div class="close" onclick="switchHelp('helpNetwork')">X</div>
   </div>
+
+  <div class="tooltip helptext hidden" id="helpAdvanced">
+    <p>
+      One of the task required to a rotator is to automatically move to a given position.
+      To perform such operation, many rotor interfaces expose a specific command, while others 
+      rely on computer software (one for all, the old parallel ARS).
+    </p>
+    <p>
+      This option allows rotctlGUI to take over the "move to" command; otherwise, you can chose to delegate to rotctld.</p>
+    <p>
+      If unsure, leave <b>rotctlGUI</b> checked.
+    </p>
+    <div class="close" onclick="switchHelp('helpAdvanced')">X</div>
+  </div>
+
+  <div class="tooltip helptext hidden" id="helpRotator1">
+    <p>To allow proper rotctlGUI operation some additional parameters are required.</p>
+    <p>
+      <b>Position Polling</b> defines how ofter rotctlGUI retrieves current position: 
+    the lower the value, the prompter the response as well as a more precise "point to".
+    </p>
+    <p style="margin-bottom: 0px;"><b>Target error</b> configures the max difference from desired target.</p>
+  </div>
+  <div class="tooltip helptext hidden" id="helpRotator2">
+    <p>
+      <b>Stop </b> is used both for designing the interface and to define the right rotation direction
+      when "point to" is managed by rotctlGUI itself.  
+    </p>
+    <div class="close" onclick="switchHelp('helpRotator1');switchHelp('helpRotator2')">X</div>
+  </div>
+
 </body>
 
 </html>

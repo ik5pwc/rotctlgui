@@ -46,7 +46,7 @@ table {
 
 
 /* ------------------------------------------------------------------------------------------------------------- */
-/* fieldsets are used to "group" similarowr settings together. There are 3 fieldsets (network, general, advanced)   */ 
+/* fieldsets are used to "group" similarowr settings together. There are 3 fieldsets (network, general, advanced)*/ 
 /* ------------------------------------------------------------------------------------------------------------- */
 
 /* Common fieldset settings  */
@@ -100,7 +100,7 @@ fieldset.file {border:none; margin-top:0px; margin-bottom:7px;}
 
 
 /* ------------------------------------------------------------------------------------------------------------- */
-/*                                    styles for tables containing settings                                      */ 
+/*                                            settings containers                                                */ 
 /* ------------------------------------------------------------------------------------------------------------- */
 
 /* specific style for each settings table */
@@ -113,6 +113,7 @@ fieldset.file {border:none; margin-top:0px; margin-bottom:7px;}
   top:0px;
 }
 
+/* Cell containing an input field */
 .input {
   white-space: nowrap;
   margin-top:0px;
@@ -122,18 +123,10 @@ fieldset.file {border:none; margin-top:0px; margin-bottom:7px;}
   height:30px;
 }
 
+/* Cell containing a radio button */
 .radiobutton { font-size: 12px; padding-top:5px; vertical-align: middle;}
 
 /* custom style for rotator name table */
-.table.name {
-  margin:auto;
-  text-align: center;
-  position: relative;
-  padding-top: 35px;
-  padding-bottom: 5px;
-  height:50px;
-}
-
 div.topbar ~ table {
   margin: auto;
   margin-top: 40px;
@@ -141,8 +134,19 @@ div.topbar ~ table {
   margin-bottom: 10px;
 }
 
+/* custom style for file path */
+span#filepath {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 245px;
+  overflow: hidden;
+  display: block;
+  font-size: 12px;
+  margin-left:5px;
+}
+
 /* ------------------------------------------------------------------------------------------------------------- */
-/*                                         Style for HTML input fields                                           */ 
+/*                                               HTML input fields                                               */ 
 /* ------------------------------------------------------------------------------------------------------------- */
 
 /* common style for all input fields */
@@ -218,14 +222,19 @@ input#filename  {width:228px;margin-left:5px;}
 }
 
 /* help tooltip */
-.helptext    { 
+.helptext    {
   background-color: khaki;  
   color: black;
   font-size: 14px;
   text-align: justify;
   padding:10px;
-  margin:auto;
-  width:90%;
+  border: 1px solid black;
+  width: 88%;
+  margin-left: 10px;
+  top:900px;
+  transition: top 0.5s;
+  visibility: visible;
+  border-radius: 15px;
 }
 
 /* location tooltip */
@@ -237,24 +246,12 @@ input#filename  {width:228px;margin-left:5px;}
   padding-right:5px; 
 }   
 
-.tooltip.help { 
-  color: black;
-  background-color: khaki;
-  font-size: 14px;
-  text-align: justify;
-  padding:10px;
-  margin:auto;
-  width:90%;
-}
-
-
 /* tooltip enable events */
 .invalid:focus ~ .tooltip.tooltip.invalidcfg {display:inline; visibility: visible; }             /* For invalid settings, display on focus */
 span#filepath:hover ~ .tooltip.path {visibility: visible;}                                       /* for path is OK hover event */
 
-
 /* Error tooltip positioning */              
-input#name    ~  .tooltip.invalidcfg { left:102px; width:140px; top: 90px; }
+input#name    ~  .tooltip.invalidcfg { left:102px; width:140px; top: px; }
 input#address ~  .tooltip.invalidcfg { left:20px ; width:210px; top:193px; }
 input#port    ~  .tooltip.invalidcfg { left:223px; width:110px; top:193px; } 
 input#polling ~  .tooltip.invalidcfg { left:8px;   width:70px;  top:300px  }
@@ -262,66 +259,48 @@ input#error   ~  .tooltip.invalidcfg { left:182px; width:90px;  top:300px; }
 input#filename ~ .tooltip.invalidcfg { left:110px;  width:200px; top:480px; }
 span#filepath  ~ .tooltip.path  { left: 10px; width:max-content; top:500px;} 
 
+/* Help positioning */
+#helpNetwork.hidden   { top:800px; }
+#helpNetwork          { top:200px; }
+#helpAdvanced.hidden  { top:-300px;}
+#helpAdvanced         { top:130px; }
+#helpRotator1         { top:35px;}
+#helpRotator2         { top:355px;}
+#helpRotator1.hidden  { top:-300px}
+#helpRotator2.hidden  { top:800px}
 
-#help_network {top:110px;}
-.tooltip.help p {margin-top:0px;}
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                            Specific tooltip help                                              */ 
+/* ------------------------------------------------------------------------------------------------------------- */
 
-/*
-border: 1px solid black;
+/* paragraph within help */
+.helptext > p {
+  margin-bottom: 10px;
+  margin-top: 0px;
+}
 
-top: -40px;
-height: 0;
-visibility: visible;
-position: relative;
-margin: auto;
-overflow: hidden;
-display: ;
-/* padding: 0; */
-/* border: 0; */
-
-
-
-
-
-
-/*
-
-#help_network {
+/* close button */
+.helptext > .close {
+  border: 1px solid black;
+  margin: auto;
+  padding: 1px;
+  position: relative;
+  width: 20px;
+  border-radius: 5px;
+  cursor: pointer;
   color: black;
-  background-color: khaki;
-  border-radius: 8px;
-  width: 275px;
-  margin-left: 10px;
-  position: absolute;
-  padding: 8px;
-  top: 100px;
-  font-size: 14px;
-  text-align: justify;
+  text-align: center;
 }
 
-
-
-*/
-
-
-
-
-
-
-span#filepath {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 245px;
-  overflow: hidden;
-  display: block;
-  font-size: 12px;
-  margin-left:5px;
+.helptext > .close:hover {
+  background-color: gray;
+  color: white;
+  border-color: gray;
 }
 
-
-
-
-
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                             Buttons configuration                                             */ 
+/* ------------------------------------------------------------------------------------------------------------- */
 
 /* generic style configu for buttons */
 .button {
