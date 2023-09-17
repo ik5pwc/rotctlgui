@@ -171,38 +171,48 @@ function btnCancel () {
 
 
 /*------------------------------------------------------
- * Function:  switchHelp
+ * Function:  toggleHelp
  * -------------------------------
- * Close or switch help on/offWhen saving data, build associative array and pass
- * to main process.
+ * Close or open specified help tooltip
  * 
  * Invoked by:
  * . DOM                        (gui/config/config.html)
  *
- * Called Sub/Functions: 
- * .electronAPI.config_tx_save  (gui/config/js/preload_config.js)
+ * Called Sub/Functions: NONE
  *
- * Global variables used: 
- * . g_currentCFG               (gui/config/js/config.js)
+ * Global variables used: NONE
  * 
- * DOM items affected:
- * . name                       (gui/config/config.html)
- * . address                    (gui/config/config.html)
- * . port                       (gui/config/config.html)
- * . polling                    (gui/config/config.html)
- * . error                      (gui/config/config.html)
- * . stopN                      (gui/config/config.html)
- * . stopS                      (gui/config/config.html)
- * . rotctlgui                  (gui/config/config.html)
- * . hamlib                     (gui/config/config.html)
+ * DOM items affected: NONE
  * 
- *
- * Arguments: NONE
+ * Arguments: 
+ * . help: is the help DIV to toggle
+ * . icon: is the help icon to enable/disable
 */
-function switchHelp (help) {
+function toggleHelp (help,icon) {
+  // retrieve help object
   let id = document.getElementById(help);
-  if ( id.classList.contains("hidden") ) {id.classList.remove("hidden"); } else {id.classList.add("hidden");}
+  
+  // Flip/flop status
+  if ( id.classList.contains("hidden") ) {
+    // Not activated, enable it removing the hidden class
+    id.classList.remove("hidden");
+    
+    // enable "?"" button
+    if ( icon != undefined) {icon.classList.add("active");}
+  
+  } else {
+    // need to disable the help
+
+    // disable all "?" buttons..
+    let active = document.getElementsByClassName("help active");
+    for (let i=0; i<active.length;i++) {active[i].classList.remove("active");}
+    
+    // add hidden class to specified help
+    id.classList.add("hidden");
+  }
 }
+
+
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Event Handlers (from node)                                         /*

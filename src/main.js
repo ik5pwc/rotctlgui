@@ -16,15 +16,12 @@ const VERSION = "0.9a"
 
 readConfiguration();
 
-//TODO: quando esco dalla CFG (con la X o con cancel, warn nel caso ci siano valori da salvare)
 //TODO: posizione finestra di config
 //TODO: protocol errors
 //TODO: logging avanzato
 //TODO: command line per prendere il nome del file di configurazione
-//TODO: config help
 //TODO: help (punta su github)
 //TODO: lingua in base alla lingua del sistema oppure forzata da cmdline
-//TODO: errore quando il nome file è vuoto
 //TODO: aprire la dialog per la directory
 
 const createWinMAIN = () => {
@@ -45,7 +42,7 @@ const createWinMAIN = () => {
   mainWin.webContents.on('did-finish-load',() => {
     
     // mainWin.removeMenu();       // Remove standard menu 
-    rotctlProtocol.connect();     // start connection
+    rotctlProtocol.connect();      // start connection
     
     // send command to update window info
     mainWin.webContents.send('main_tx_misc',configuration.name,configuration.stop,VERSION);

@@ -98,6 +98,8 @@ fieldset.file {border:none; margin-top:0px; margin-bottom:7px;}
   right: 20px;
 }
 
+/* ? icon when text is displayed */
+.help.active { background-color:green;border-color: green;}
 
 /* ------------------------------------------------------------------------------------------------------------- */
 /*                                            settings containers                                                */ 
