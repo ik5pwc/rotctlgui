@@ -11,8 +11,8 @@
 /* ---------------- Required modules and files ---------------- */
 const fs        = require('fs');
 const path      = require('path');
+const os        = require("os");
 const myClasses = require('./myclasses.js');
-
 
 
 /* --------------------------------------------------------------------------------------------------------- */
@@ -26,7 +26,7 @@ const myClasses = require('./myclasses.js');
 /* --------------------------------------------------------------------------------------------------------- */
 
 exports.readConfigFile   = readConfigFile;
-exports.saveConfigFile   = saveConfigFile;
+exports.writeConfigFile  = writeConfigFile;
 
 
 /*------------------------------------------------------
@@ -43,14 +43,23 @@ exports.saveConfigFile   = saveConfigFile;
  * Global variables used: NONE
  * 
  * Global Objects used: NONE
- * . fs                     (configFile.js)   
+ * . fs            
+
+Use the os.EOL constant instead.
+
+var os = require("os");         (configFile.js)   
  *
  * Arguments:
  * . file: full path to configuration file
 */
-function readConfigFile(file,config) {
-  let JSONConfig= ""                          // JSON data from file
-  let defcfg = new myClasses.config           // used for default config
+function readConfigFile(config) {
+  let JSONConfig= ""                              // JSON data from file
+  let defcfg = new myClasses.config               // used for default config
+  let file = path.join(config.path,config.file);  // full file path
+
+  // Set the default config file name and path the same as passed from caller
+  defcfg.path = config.path;
+  defcfg.file = config.file;
 
   // Try to read and parse configuration file
   try {   
@@ -58,47 +67,78 @@ function readConfigFile(file,config) {
     JSONConfig = JSON.parse(fs.readFileSync(file, 'ascii'));
     console.log("Reading configuration file " + file);
     JSONConfig = validateConfig(JSONConfig);
-
+   
+    // populate configuration data structure passed from caller
+    config.name    = JSONConfig.name;
+    config.address = JSONConfig.address;
+    config.port    = JSONConfig.port;
+    config.polling = JSONConfig.polling;
+    config.error   = JSONConfig.max_degree_error;
+    config.stop    = JSONConfig.stop_degree;
+    config.moveTo  = JSONConfig.move_to_supported;
     
   } catch {
-    console.error(file + " doesn't exist or is not a properly configured JSON file, loading default values...");
+    console.error(file + " doesn't exist or is not a properly configured JSON file, creating it using default values...");
     
     // Save config file
-    writeConfigFile(file, defcfg);
+    writeConfigFile(defcfg);
+
+    // Return default values
+    config.name    = defcfg.name;
+    config.address = defcfg.address;
+    config.port    = defcfg.port;
+    config.polling = defcfg.polling;
+    config.error   = defcfg.max_degree_error;
+    config.stop    = defcfg.stop_degree;
+    config.moveTo  = defcfg.move_to_supported;
   }
-  
-  // populate configuration data structure passed from caller
-  config.name    = JSONConfig.name;
-  config.address = JSONConfig.address;
-  config.port    = JSONConfig.port;
-  config.polling = JSONConfig.polling;
-  config.error   = JSONConfig.max_degree_error;
-  config.stop    = JSONConfig.stop_degree;
-  config.moveTo  = JSONConfig.move_to_supported;
-  config.file    = path.basename(file);
-  config.path    = path.dirname(file);
 }
 
 
 
+/*------------------------------------------------------
+ * Function: writeConfigFile
+ * -------------------------------
+ * Write JSON configuration file to disk.
+ *
+ * Invoked by:
+ * . readConfigFile         (configFile.js)
+ * . electron ipc           (main.js)
+ *
+ * Called Sub/Functions: NONE
+ * 
+ * Global constants used: NONE
+ *
+ * Global variables used: NONE
+ *
+ * Global Objects used: NONE                   
+ *
+ * Arguments: 
+ * . config: configuration object to write to file
+ * 
+*/
+function writeConfigFile(config){
+  let JSONConfig= ""                              // JSON data to file
+  let file = path.join(config.path,config.file);  // full file path
 
-function createDefaultConfig () {
-  let JSONConfig= ""                          // JSON data from file
-  let defcfg = new myClasses.config          // used for default config
-
-  // Create default config
-  JSONConfig = "{"
-                +" \"name\": \"" + defcfg.name + "\","
-                +" \"address\": \"" + defcfg.address + "\","
-                +" \"port\": " + defcfg.port + ","
-                +" \"polling\": " + defcfg.polling + ","
-                +" \"max_degree_error\": " + defcfg.error + ","
-                +" \"stop_degree\": " + defcfg.stop + ","
-                +" \"move_to_supported\": \"" + defcfg.moveTo + "\" "
+  // Create JSON string data
+  JSONConfig = "{" + os.EOL
+                +" \"name\": \"" + config.name + "\"," + os.EOL
+                +" \"address\": \"" + config.address + "\"," + os.EOL
+                +" \"port\": " + config.port + "," + os.EOL
+                +" \"polling\": " + config.polling + "," + os.EOL
+                +" \"max_degree_error\": " + config.error + "," + os.EOL
+                +" \"stop_degree\": " + config.stop + "," + os.EOL
+                +" \"move_to_supported\": \"" + (config.moveTo ? "Y" : "N" ) + "\" " + os.EOL
               +"}";
 
-
-
+  try {
+    // Create path and save
+    fs.mkdirSync(config.path,{recursive:true});
+    fs.writeFileSync(file,JSONConfig,{encoding:'ascii',flag:'w'});
+  } catch {
+    console.error("Unable to save config file " + file);
+  }
 }
 
 
@@ -123,38 +163,30 @@ function createDefaultConfig () {
  * . file: full path to file to write
  * . cfg: JSON configuration string
  * 
-*/
+
 function saveConfigFile(config){
   let JSONConfig= ""                          // JSON data to file
 
-  // Create default config
+  // Create file data
   JSONConfig = "{"
-                +" \"name\": \"" + defcfg.name + "\","
-                +" \"address\": \"" + defcfg.address + "\","
-                +" \"port\": " + defcfg.port + ","
-                +" \"polling\": " + defcfg.polling + ","
-                +" \"max_degree_error\": " + defcfg.error + ","
-                +" \"stop_degree\": " + defcfg.stop + ","
-                +" \"move_to_supported\": \"" + defcfg.moveTo + "\" "
+                +" \"name\": \"" + config.name + "\","
+                +" \"address\": \"" + config.address + "\","
+                +" \"port\": " + config.port + ","
+                +" \"polling\": " + config.polling + ","
+                +" \"max_degree_error\": " + config.error + ","
+                +" \"stop_degree\": " + config.stop + ","
+                +" \"move_to_supported\": \"" + config.moveTo + "\" "
               +"}";
-
-
-
-}
-
 
   try {
     // Create path and save
-    fs.mkdirSync(path.dirname(file),{recursive:true});
-    fs.writeFileSync(file,JSON.stringify(JSONcfg,null,2));
+    fs.mkdirSync(config.path,{recursive:true});
+    fs.writeFileSync(zz,JSON.stringify(JSONcfg,null),{encoding:'ascii'});
   } catch {
     console.error("Unable to save config file " + file);
   }
 }
-
-
-
-function b
+/*
 
 
 /* --------------------------------------------------------------------------------------------------------- */
@@ -184,7 +216,7 @@ function b
  * . cfg: configuration data in JSON format
  */
 function validateConfig (cfg) {
-  let defcfg = new myClasses.config();         // empty "config" object used for default data
+  let defcfg = new myClasses.config();         // empty "config" object used for loading default if error found
 
   // Check for valid port number
   if ( ! (!isNaN(cfg.port) && cfg.port >1024 &&  cfg.port < 65535)) {
@@ -205,7 +237,7 @@ function validateConfig (cfg) {
   } 
 
   // Check for valid stop value 
-  if ( !isNaN(cfg.stop_degree) && cfg.stop != 180 && cfg.stop_degree != 0 ) {
+  if ( !isNaN(cfg.stop_degree) && cfg.stop_degree != 180 && cfg.stop_degree != 0 ) {
     console.warn("Invalid configuration for \"stop\": " + cfg.stop_degree + " (allowed value: 0 or 180). Using default " + defcfg.stop);
     cfg.stop = defcfg.stop;
   } 
@@ -218,39 +250,4 @@ function validateConfig (cfg) {
 
   // Return updated config object
   return cfg
-  /*------------------------------------------------------
-   * Function: saveConfigFile
-   * -------------------------------
-   * Write JSON configuration file to disk.
-   *
-   * Invoked by:
-   * . readConfigFile         (configFile.js)
-   *
-   * Called Sub/Functions: NONE
-   * 
-   * Global constants used: NONE
-   *
-   * Global variables used: NONE
-   *
-   * Global Objects used: NONE                   
-   *
-   * Arguments: 
-   * . file: full path to file to write
-   * . cfg: JSON configuration string
-   * 
-  */
-  function saveConfigFile(file,cfg){
-    try {
-      // Create path and save
-      fs.mkdirSync(path.dirname(file),{recursive:true});
-      fs.writeFileSync(file,JSON.stringify(cfg,null,2));
-    } catch {
-      console.error("Unable to save config file " + file);
-    }
-  }
-  ;
 }
-
-
-
-

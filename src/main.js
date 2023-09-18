@@ -3,6 +3,7 @@ const myClasses              = require('./myclasses.js');
 const path                   = require('path')
 const rotctlProtocol         = require('./rotctlProtocol.js');
 const configFile             = require('./configFile.js');
+const { config } = require('process');
 
 
 const configuration = new myClasses.config();
@@ -12,7 +13,7 @@ exports.config = configuration;
 let mainWin;
 let winCFG;
 
-const VERSION = "0.9a"
+const VERSION = "1.0a"
 
 readConfiguration();
 
@@ -88,12 +89,13 @@ app.whenReady().then(() => { createWinMAIN()});
 
 
 
-
-
-
 function readConfiguration() {
+  // TODO: qui devo passare i valori eventualmente presi da cmdline
+configuration.file = 'default.json';
+configuration.path = app.getPath('appData')+"/rotctlGUI/";
+
   // Read configuration file
-  configFile.readConfigFile(app.getPath('appData')+"/rotctlGUI/default.json",configuration);
+  configFile.readConfigFile(configuration);
   
   // Export configuration to network connection module
   //rotctlProtocol.setConfig(configuration);
@@ -113,4 +115,10 @@ ipcMain.on('main_rx_openConfig',(event)       => {createWinCFG();});
 
 // Events from config window
 ipcMain.on('rx_config_cancel',(event)         => {winCFG.close()});
-ipcMain.on('main_rx_configSave',(event,cfg)   => {console.log(cfg); })
+ipcMain.on('main_rx_configSave',(event,cfg)   => {
+  configFile.writeConfigFile(cfg);
+  readConfiguration();
+  mainWin.reload();
+  winCFG.close();
+
+})

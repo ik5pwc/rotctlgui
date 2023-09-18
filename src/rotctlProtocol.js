@@ -104,6 +104,7 @@ function setTarget(target) {
  * Arguments: NONE
 */
 function connect() {
+  if (client.isConnected) {client.destroy()};
   console.log("Starting connection to " + main.config.address + ":" + main.config.port);
   
   // Generic connection parameters
@@ -201,8 +202,11 @@ function turn(direction) {
  * Arguments: NONE
 */
 function pollAzimuth () {
-  if (status.connected) {sendCommand("+p");}
-  setTimeout(()=>{pollAzimuth()},main.config.polling);
+  if (status.connected) {
+    sendCommand("+p");
+    id = setTimeout(()=>{pollAzimuth()},main.config.polling);  
+  }
+  console.log(id)
 }
 
 
