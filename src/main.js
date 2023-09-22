@@ -1,21 +1,22 @@
 const { app, BrowserWindow,ipcMain, dialog } = require('electron')
-const myClasses              = require('./myclasses.js');
-const path                   = require('path')
-const rotctlProtocol         = require('./rotctlProtocol.js');
-const configFile             = require('./configFile.js');
-const { config } = require('process');
+const myClasses          = require('./myclasses.js');
+const path               = require('path')
+const rotctlProtocol     = require('./rotctlProtocol.js');
+const config             = require('./configFile.js');
 
 
-const configuration = new myClasses.config();
 
-exports.config = configuration;
+
 
 let mainWin;
 let winCFG;
 
+
 const VERSION = "1.0a"
 
 readConfiguration();
+
+rotctlProtocol.startPolling(config.polling);
 
 //TODO: posizione finestra di config
 //TODO: protocol errors
@@ -24,6 +25,7 @@ readConfiguration();
 //TODO: help (punta su github)
 //TODO: lingua in base alla lingua del sistema oppure forzata da cmdline
 //TODO: aprire la dialog per la directory
+// TODO: verificare con il dummy rotator lo stop N/S
 
 const createWinMAIN = () => {
   mainWin = new BrowserWindow({
@@ -46,7 +48,7 @@ const createWinMAIN = () => {
     rotctlProtocol.connect();      // start connection
     
     // send command to update window info
-    mainWin.webContents.send('main_tx_misc',configuration.name,configuration.stop,VERSION);
+    mainWin.webContents.send('main_tx_misc',config.name,config.stop,VERSION);
   });
 }
 
@@ -71,17 +73,20 @@ const createWinCFG = () => {
   winCFG.webContents.on('did-finish-load',()  => {
 
     // Send current configuration
-    winCFG.send('tx_allconf',{ name   : configuration.name,
-                               address: configuration.address,
-                               port   : configuration.port,
-                               polling: configuration.polling,
-                               error  : configuration.error,
-                               stop   : configuration.stop,
-                               moveTo : configuration.moveTo,
-                               file   : configuration.file,
-                               path   : configuration.path 
-                             }) 
+    winCFG.send('tx_allconf', config.exportAsJSON());
+/*
+    winCFG.send('tx_allconf',{ name   : config.name,
+                               address: config.address,
+                               port   : config.port,
+                               polling: config.polling,
+                               error  : config.error,
+                               stop   : config.stop,
+                               moveTo : config.moveTo,
+                               file   : config.file,
+                               path   : config.path 
+                             }) */
   })
+  
 }
 
 app.whenReady().then(() => { createWinMAIN()});
@@ -91,11 +96,11 @@ app.whenReady().then(() => { createWinMAIN()});
 
 function readConfiguration() {
   // TODO: qui devo passare i valori eventualmente presi da cmdline
-configuration.file = 'default.json';
-configuration.path = app.getPath('appData')+"/rotctlGUI/";
+let file = 'default.json';
+let path = app.getPath('appData')+"/rotctlGUI/";
 
   // Read configuration file
-  configFile.readConfigFile(configuration);
+  config.readConfigFile(path,file);
   
   // Export configuration to network connection module
   //rotctlProtocol.setConfig(configuration);
@@ -116,9 +121,16 @@ ipcMain.on('main_rx_openConfig',(event)       => {createWinCFG();});
 // Events from config window
 ipcMain.on('rx_config_cancel',(event)         => {winCFG.close()});
 ipcMain.on('main_rx_configSave',(event,cfg)   => {
-  configFile.writeConfigFile(cfg);
+  config.importAsJSON(cfg);
   readConfiguration();
   mainWin.reload();
   winCFG.close();
 
 })
+
+
+/* --------------------------------------------------------------------------------------------------------- */
+/*                                        Module (private) functions                                         */
+/* --------------------------------------------------------------------------------------------------------- */
+
+function updateConfig() {}

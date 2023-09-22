@@ -245,7 +245,7 @@ function toggleHelp (help,icon) {
  *
  * Arguments: NONE
 */
-
+/*
 window.electronAPI.rx_main_allconf((_event,array) => {
 
   g_currentCFG.name = array.name;
@@ -273,5 +273,40 @@ window.electronAPI.rx_main_allconf((_event,array) => {
   document.getElementById("filename").value = g_currentCFG.file;
 
   g_currentCFG.path = array.path;
+  document.getElementById("filepath").innerHTML = g_currentCFG.path;
+});
+
+
+*/
+
+window.electronAPI.rx_main_allconf((_event,jsonString) => {
+
+  //
+  let json = JSON.parse(jsonString);
+  g_currentCFG.name = json.name;
+  document.getElementById("name").value = g_currentCFG.name;
+
+  g_currentCFG.address = json.address;
+  document.getElementById("address").value= g_currentCFG.address;
+
+  g_currentCFG.port = json.port;
+  document.getElementById("port").value= g_currentCFG.port;
+
+  g_currentCFG.polling = json.polling;
+  document.getElementById("polling").value = g_currentCFG.polling;
+
+  g_currentCFG.error = json.error;
+  document.getElementById("error").value = g_currentCFG.error;
+
+  g_currentCFG.stop = json.stop;
+  if (g_currentCFG.stop == 180) {document.getElementById("stopS").checked=true;} else {document.getElementById("stopN").checked=true;}
+
+  g_currentCFG.moveTo = json.moveTo;
+  if (g_currentCFG.moveTo == 'Y') {document.getElementById("hamlib").checked=true;} else {document.getElementById("rotctlgui").checked=true;}
+
+  g_currentCFG.file = json.file;
+  document.getElementById("filename").value = g_currentCFG.file;
+
+  g_currentCFG.path = json.path;
   document.getElementById("filepath").innerHTML = g_currentCFG.path;
 });

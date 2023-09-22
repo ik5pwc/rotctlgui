@@ -22,6 +22,7 @@ class protocolStatus {
   motor        = "S"           // Motor status
   connected    = false         // turn to true after verify connection
   errors       = 0             // Communication error
+  pollID       = 0             // ID assigned by setInterval (used to clear when changing rate)
 }
 
 // Export classes

@@ -10,8 +10,10 @@
 
 /* --------------------- Required modules --------------------- */
 const Net               = require('node:net'); 
+const configuration     = require('./configFile.js');
 const myClasses         = require('./myclasses.js');
-const main              = require ('./main.js');
+const main              = require('./main.js');
+
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                              Global objects                                               /*
@@ -26,12 +28,19 @@ const status = new myClasses.protocolStatus();   // protocol-related information
 /*                                            Exported Functions                                             /*
 /* --------------------------------------------------------------------------------------------------------- */
 
-exports.connect      = connect;
-exports.setTarget    = setTarget;
-//exports.stop         = stop;
-exports.turn         = turn;
-exports.isIP         = Net.isIP;
 
+module.exports = {
+  startPolling,
+  connect,
+  setTarget,
+  turn,
+  configure 
+}
+
+
+function configure (cfg) {
+  config = JSON.parse(cfg)
+}
 
 
 /*------------------------------------------------------
@@ -54,7 +63,7 @@ exports.isIP         = Net.isIP;
  * Arguments:
  * . target: pointer to configuration structure managing all configuration states
 */
-function setTarget(target) {
+function setTarget (target) {
   let current = status.azimuth;   // copy of current pointing
   let motor = "S"                 // set current motor status as STOP
 
@@ -64,7 +73,7 @@ function setTarget(target) {
   status.target = parseInt(target);
   
   // check target > minSkew
-  if (Math.abs(status.azimuth - status.target) < main.config.error) {
+  if (Math.abs(status.azimuth - status.target) < configuration.error) {
     // target near to current azimuth, report as done
     main.onTarget(); 
     turn("S");
@@ -76,69 +85,14 @@ function setTarget(target) {
         sendCommand("+P " + status.target + ".0 0.0") 
     } else {
       // Manage values when stop is at 180
-      if (target > 180)  {target -= 2*main.config.stop;} 
-      if (current > 180) {current -= 2*main.config.stop;} 
+      if (target > 180)  {target -= 2*configuration.stop;} 
+      if (current > 180) {current -= 2*configuration.stop;} 
       
       // now that target and current have been properly scaled, check turn direction
       if (target < current) {turn ("CCW")} else {turn ("CW");}
     }
   }
 }
-
-
-
-/*------------------------------------------------------
- * Function: connect
- * -------------------------------
- * Establish connection to rotctld instance 
- *
- * Invoked by:
- * . startup                (main.js)
- *
- * Called Sub/Functions: NONE
- *
- * Global variables used: 
- * . client                 (rotctlProtocol.js)
- * . main.config            (main.js)
- *
- * Arguments: NONE
-*/
-function connect() {
-  if (client.isConnected) {client.destroy()};
-  console.log("Starting connection to " + main.config.address + ":" + main.config.port);
-  
-  // Generic connection parameters
-  client.setKeepAlive = true;
-  client.setTimeout = 2000;
-
-  // Start Connection
-  client.connect({ port: main.config.port, host: main.config.address },undefined);
-}
-
-
-
-/*------------------------------------------------------
- * Function: stop
- * -------------------------------
- * Immediatly stop motor 
- *
- * Invoked by:
- * . event emitter          (main.js)
- *
- * Called Sub/Functions: 
- * . sendCommand            (rotctlProtocol.js)
- *
- * Global variables used: NONE
- *
- * Arguments: NONE
-
-function stop() {
-  console.log("Stopping motor");
-  
-  // Generic connection parameters
-  sendCommand("+S");
-}
-*/
 
 
 
@@ -174,9 +128,71 @@ function turn(direction) {
     case "S":
       console.log("Stopping motor");
       sendCommand("+S");
+
       status.motor = "S";
       break;
   }
+}
+
+
+
+/*------------------------------------------------------
+ * Function: connect
+ * -------------------------------
+ * Establish connection to rotctld instance 
+ *
+ * Invoked by:
+ * . startup                (main.js)
+ *
+ * Called Sub/Functions: NONE
+ *
+ * Global variables used: 
+ * . client                 (rotctlProtocol.js)
+ * . main.config            (main.js)
+ *
+ * Arguments: NONE
+*/
+function connect() {
+  
+  // Disconnect active connections
+  if (client.isConnected) {
+    console.log("Closing connection to " + client.address + ":" + client.port);
+    client.destroy();
+  }
+
+  // Logging
+  console.log("Starting connection to " + configuration.address + ":" + configuration.port);
+  
+  // Generic connection parameters
+  client.setKeepAlive = true;
+  client.setTimeout = 2000;
+
+  // Start Connection
+  client.connect({ port: configuration.port, host: configuration.address },undefined);
+}
+
+
+
+/*------------------------------------------------------
+ * Function: startPolling
+ * -------------------------------
+ * Start polling rotctld for position (if connected) 
+ *
+ * Invoked by:
+ * . startup                (main.js)
+ * . updateConfiguration
+ *
+ * Called Sub/Functions: NONE
+ *
+ * Global variables used: 
+ * . status                 (rotctlProtocol.js)
+ *
+ * Arguments: 
+ * . rate: polling rate in milliseconds
+*/
+function startPolling(rate) {
+  if (status.pollID != 0) {clearInterval(status.poll)}
+  status.pollID = setInterval(() => {if (status.connected) {sendCommand("+p")}},rate);
 }
 
 
@@ -186,39 +202,13 @@ function turn(direction) {
 /* --------------------------------------------------------------------------------------------------------- */
 
 /*------------------------------------------------------
- * Function: pollAzimuth
- * -------------------------------
- * Periodic function to ask for current position
- *
- * Invoked by:
- * . Javascript timer       (rotctlProtocol.js)
- *
- * Called Sub/Functions: 
- * . sendCommand            (rotctlProtocol.js)
- *
- * Global variables used: 
- * . config                 (rotctlProtocol.js)
- * 
- * Arguments: NONE
-*/
-function pollAzimuth () {
-  if (status.connected) {
-    sendCommand("+p");
-    id = setTimeout(()=>{pollAzimuth()},main.config.polling);  
-  }
-  console.log(id)
-}
-
-
-
-/*------------------------------------------------------
  * Function: sendCommand
  * -------------------------------
  * Send specific command to rotctld
  *
  * Invoked by:
  * . hEstablished           (rotctlProtocol.js)
- * . pollAzimuth            (rotctlProtocol.js)
+ * . polling Timer ()            (rotctlProtocol.js)
  * . setTarget              (rotctlProtocol.js)
  *
  * Called Sub/Functions: NONE
@@ -240,7 +230,7 @@ function sendCommand(cmd) {
 
 
 
-/*------------------------------------------------------sendCommand(
+/*--------------------------------
  * Function: checkReply
  * -------------------------------
  * Evaluate replies to sent commands
@@ -264,7 +254,6 @@ function checkReply(reply) {
   let replyOK = false;        // by default reply is wrong
 
   switch (status.sent.pop().substring(0,2)) {
-
     case "1" : replyOK = replyCapabilities(reply); break; 
     case "+p": replyOK = replyGetPos(reply)      ; break;
     case "+P": replyOK = replySetPos(reply)      ; break;       
@@ -285,7 +274,9 @@ function checkReply(reply) {
  *
  * Invoked by:
  * . checkReply             (rotctlProtocol.js)
- *
+ *module.exports = function () {
+  console.log("hello world")
+}
  * Called Sub/Functions: NONE 
  * 
  * Global variables used: NONE
@@ -325,7 +316,7 @@ function replyCapabilities(buffer) {
     console.log("Rotator model: " + model[1]);
     status.connected = true;                            // update connection status
     main.isConnected(true);                             // inform GUI about status
-    pollAzimuth();                                      // Start polling
+    //pollAzimuth();                                      // Start polling
 
     // Valid response detected
     return true;
@@ -413,13 +404,49 @@ function manageProtocolError() {
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                          Event Receivers and Handlers                                     */
 /* --------------------------------------------------------------------------------------------------------- */
-client.on('error',    () => {hClosed()});
-client.on('end',      () => {hClosed()});
+// Simply ignore any kind of error
+client.on('error',() => {});
+
+
+
+/*------------------------------------------------------
+ * Event: net.socket close
+ * -------------------------------
+ * Triggered when socket is closed: connection
+ * retry after 2 seconds
+ *
+ * Invoked by:
+ * . Net                    (nodejs Net module)
+ *
+ * Called Sub/Functions: 
+ * . connect                (rotctlProtocol.js)
+ * . main.isConnected       (main.js)
+ * 
+ * Global variables used: 
+ * . status                 (rotctlProtocol.js)
+ * 
+ * Arguments: NONE
+*/
+client.on('close',() => {
+  console.warn("Connection to " + configuration.address + ":" + configuration.port + " closed. Retry in 2 sec.")
+  
+  // Notify GUI about disconnect
+  main.isConnected(false);
+  
+  // Retry connection
+  setTimeout(()=>{connect()},2000);
+
+  // clear RX buffer
+  status.rxBuffer = "";
+  status.sent=[];
+  status.connected = false;
+});
+
 
 
 /* Connection event handlers */
 client.on("connect",  () => {
-  console.log("Connected to " + main.config.address + ": " + main.config.port + " . Verify rotctld instance..")
+  console.log("Connected to " + configuration.address + ": " + configuration.port + " . Verify rotctld instance..")
 
   // Send basic command to verify we're connected to a rotctld instance
   sendCommand("1");
@@ -449,18 +476,3 @@ client.on('data',(data) => {
 });
 
 
-
-function hClosed(){
-  console.warn("Connection to " + main.config.address + ":" + main.config.port + " closed. Retry in 2 sec.")
-  
-  // Notify GUI about disconnect
-  main.isConnected(false);
-  
-  // Retry connection
-  setTimeout(()=>{connect()},2000);
-
-  // clear RX buffer
-  status.rxBuffer = "";
-  status.sent=[];
-  status.connected = false;
-}
