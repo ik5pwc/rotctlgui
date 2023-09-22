@@ -8,7 +8,7 @@ const config             = require('./configFile.js');
 
 
 
-let mainWin;
+let winCompass;
 let winCFG;
 
 
@@ -28,7 +28,7 @@ rotctlProtocol.startPolling(config.polling);
 // TODO: verificare con il dummy rotator lo stop N/S
 
 const createWinMAIN = () => {
-  mainWin = new BrowserWindow({
+  winCompass = new BrowserWindow({
     width: 320,
     height: 365,
     resizable: false,
@@ -40,15 +40,15 @@ const createWinMAIN = () => {
     }
   })
 
-  mainWin.loadFile('gui/compass/compass.html')
+  winCompass.loadFile('gui/compass/compass.html')
   
-  mainWin.webContents.on('did-finish-load',() => {
+  winCompass.webContents.on('did-finish-load',() => {
     
     // mainWin.removeMenu();       // Remove standard menu 
     rotctlProtocol.connect();      // start connection
     
     // send command to update window info
-    mainWin.webContents.send('main_tx_misc',config.name,config.stop,VERSION);
+    winCompass.webContents.send('main_tx_misc',config.name,config.stop,VERSION);
   });
 }
 
@@ -59,7 +59,7 @@ const createWinCFG = () => {
     height: 570,
     resizable: false,
     autoHideMenuBar: false,
-    parent: mainWin,
+    parent: winCompass,
     modal:true,
     menuBarVisible:true,
     frame:false,
@@ -70,22 +70,8 @@ const createWinCFG = () => {
   
   winCFG.loadFile('gui/config/config.html')
 
-  winCFG.webContents.on('did-finish-load',()  => {
-
-    // Send current configuration
-    winCFG.send('tx_allconf', config.exportAsJSON());
-/*
-    winCFG.send('tx_allconf',{ name   : config.name,
-                               address: config.address,
-                               port   : config.port,
-                               polling: config.polling,
-                               error  : config.error,
-                               stop   : config.stop,
-                               moveTo : config.moveTo,
-                               file   : config.file,
-                               path   : config.path 
-                             }) */
-  })
+   // Send current configuration
+  winCFG.webContents.on('did-finish-load',()  => {  winCFG.send('tx_allconf', config.getAsJSONString()); })
   
 }
 
@@ -101,31 +87,27 @@ let path = app.getPath('appData')+"/rotctlGUI/";
 
   // Read configuration file
   config.readConfigFile(path,file);
-  
-  // Export configuration to network connection module
-  //rotctlProtocol.setConfig(configuration);
 }
 
 
 
 // "events" from rotctlProtocol dispatched to main window
-exports.isConnected    = function (conn)  {mainWin.webContents.send('main_tx_conn',conn);};
-exports.curAzimuth     = function (az)    {mainWin.webContents.send('main_tx_azimuth',az);};
-exports.onTarget       = function ()      {mainWin.webContents.send('main_tx_target');};
+exports.isConnected    = function (conn)  {winCompass.webContents.send('main_tx_conn',conn);};
+exports.curAzimuth     = function (az)    {winCompass.webContents.send('main_tx_azimuth',az);};
+exports.onTarget       = function ()      {winCompass.webContents.send('main_tx_target');};
 
 /* Route Events received from main window */
-ipcMain.on('main_rx_target',(event, value)    => {rotctlProtocol.setTarget(value);});  // user selected a targt
-ipcMain.on('main_rx_turn',(event,value)       => {rotctlProtocol.turn(value);});       // user ask for CW, CCW rotation or stop
-ipcMain.on('main_rx_openConfig',(event)       => {createWinCFG();});
+ipcMain.on('rx_main_target',(event, value)    => {rotctlProtocol.setTarget(value);});  // user selected a targt
+ipcMain.on('rx_main_turn',(event,value)       => {rotctlProtocol.turn(value);});       // user ask for CW, CCW rotation or stop
+ipcMain.on('rx_main_openConfig',(event)       => {createWinCFG();});
 
 // Events from config window
 ipcMain.on('rx_config_cancel',(event)         => {winCFG.close()});
-ipcMain.on('main_rx_configSave',(event,cfg)   => {
-  config.importAsJSON(cfg);
-  readConfiguration();
-  mainWin.reload();
+ipcMain.on('rx_config_save'  ,(event,cfg)     => {
+  config.setAsJSONString(JSON.stringify(cfg));
+  config.writeConfigFile()
+  winCompass.reload();
   winCFG.close();
-
 })
 
 

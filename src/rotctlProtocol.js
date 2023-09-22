@@ -10,7 +10,7 @@
 
 /* --------------------- Required modules --------------------- */
 const Net               = require('node:net'); 
-const configuration     = require('./configFile.js');
+const config            = require('./configFile.js');
 const myClasses         = require('./myclasses.js');
 const main              = require('./main.js');
 
@@ -33,8 +33,8 @@ module.exports = {
   startPolling,
   connect,
   setTarget,
-  turn,
-  configure 
+  turn
+  /*configure*/ 
 }
 
 
@@ -73,20 +73,20 @@ function setTarget (target) {
   status.target = parseInt(target);
   
   // check target > minSkew
-  if (Math.abs(status.azimuth - status.target) < configuration.error) {
+  if (Math.abs(status.azimuth - status.target) < config.error) {
     // target near to current azimuth, report as done
     main.onTarget(); 
     turn("S");
 
   } else {
-    if (main.config.moveTo == 'Y') {
+    if (config.moveTo == 'Y') {
         // Rotor support "P" command, all job is performed by rotctld
         status.motor = "P"
         sendCommand("+P " + status.target + ".0 0.0") 
     } else {
       // Manage values when stop is at 180
-      if (target > 180)  {target -= 2*configuration.stop;} 
-      if (current > 180) {current -= 2*configuration.stop;} 
+      if (target > 180)  {target -= 2*config.stop;} 
+      if (current > 180) {current -= 2*config.stop;} 
       
       // now that target and current have been properly scaled, check turn direction
       if (target < current) {turn ("CCW")} else {turn ("CW");}
@@ -114,23 +114,25 @@ function setTarget (target) {
  * . direction: can be CW or CCW or S to sopr motor
 */
 function turn(direction) {
-  switch (direction) {
-    case "CW":
-      console.log("Turning rotor CW");
-      sendCommand("+M 16 0");
-      status.motor = "CW";
-      break;
-    case "CCW":
-      console.log("Turning rotor CCW");
-      sendCommand("+M 8 0");
-      status.motor = "CCW";
-      break;
-    case "S":
-      console.log("Stopping motor");
-      sendCommand("+S");
+  if (status.isConnected) {
+    switch (direction) {
+      case "CW":
+        console.log("Turning rotor CW");
+        sendCommand("+M 16 0");
+        status.motor = "CW";
+        break;
+      case "CCW":
+        console.log("Turning rotor CCW");
+        sendCommand("+M 8 0");
+        status.motor = "CCW";
+        break;
+      case "S":
+        console.log("Stopping motor");
+        sendCommand("+S");
 
-      status.motor = "S";
-      break;
+        status.motor = "S";
+        break;
+    }
   }
 }
 
@@ -161,14 +163,14 @@ function connect() {
   }
 
   // Logging
-  console.log("Starting connection to " + configuration.address + ":" + configuration.port);
+  console.log("Starting connection to " + config.address + ":" + config.port);
   
   // Generic connection parameters
   client.setKeepAlive = true;
   client.setTimeout = 2000;
 
   // Start Connection
-  client.connect({ port: configuration.port, host: configuration.address },undefined);
+  client.connect({ port: config.port, host: config.address },undefined);
 }
 
 
@@ -316,7 +318,6 @@ function replyCapabilities(buffer) {
     console.log("Rotator model: " + model[1]);
     status.connected = true;                            // update connection status
     main.isConnected(true);                             // inform GUI about status
-    //pollAzimuth();                                      // Start polling
 
     // Valid response detected
     return true;
@@ -359,13 +360,13 @@ function replyGetPos(buffer){
     main.curAzimuth(status.azimuth);
 
     // Computer target and azimuth based on "stop"
-    if (current > 180) {current -=2*main.config.stop;}
-    if (target > 180)  {target  -=2*main.config.stop;}
+    if (current > 180) {current -=2*config.stop;}
+    if (target > 180)  {target  -=2*config.stop;}
     
     // Check for target or  errors
     if ( (status.motor != "S" && status.target != null) &&
-         ( ( status.azimuth == main.config.stop ) ||                               // Stop position reached
-           (Math.abs(status.azimuth - status.target) < main.config.error) ||       // near target
+         ( ( status.azimuth == config.stop ) ||                               // Stop position reached
+           (Math.abs(status.azimuth - status.target) < config.error) ||       // near target
            (current > target && status.motor == "CW") ||
            (current < target && status.motor == "CCW")                             // target overshot 
    
@@ -428,7 +429,7 @@ client.on('error',() => {});
  * Arguments: NONE
 */
 client.on('close',() => {
-  console.warn("Connection to " + configuration.address + ":" + configuration.port + " closed. Retry in 2 sec.")
+  console.warn("Connection to " + config.address + ":" + config.port + " closed. Retry in 2 sec.")
   
   // Notify GUI about disconnect
   main.isConnected(false);
@@ -446,7 +447,7 @@ client.on('close',() => {
 
 /* Connection event handlers */
 client.on("connect",  () => {
-  console.log("Connected to " + configuration.address + ": " + configuration.port + " . Verify rotctld instance..")
+  console.log("Connected to " + config.address + ": " + config.port + " . Verify rotctld instance..")
 
   // Send basic command to verify we're connected to a rotctld instance
   sendCommand("1");

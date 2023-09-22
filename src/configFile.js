@@ -29,8 +29,8 @@ module.exports ={
   readConfigFile : readConfigFile,  
   writeConfigFile: writeConfigFile,
   
-  getJSONString: ()  => {return JSON.stringify(g_config)},
-  setJSONString: (x) => {g_config = JSON.parse(x)},
+  getAsJSONString: ()  => {return JSON.stringify(g_config)},
+  setAsJSONString: (x) => {g_config = JSON.parse(x)},
 
   // Exporting properties
   get name()     { return g_config.name;},         // name (read)

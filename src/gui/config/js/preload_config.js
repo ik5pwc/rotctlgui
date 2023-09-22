@@ -14,7 +14,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   rx_main_allconf:   (callback) => ipcRenderer.on('tx_allconf',(callback)),       // FROM nodejs processes to populate GUI with current config
-  tx_cancel:         ()         => ipcRenderer.send('rx_config_cancel'),          // FROM renderer (config.html) when hitting cancel button 
+  config_tx_cancel:  ()         => ipcRenderer.send('rx_config_cancel'),          // FROM renderer (config.html) when hitting cancel button 
   config_tx_save:    (cfg)      => ipcRenderer.send('main_rx_configSave',cfg)     // FROM renderer (config.html) when hitting save button
 })
  
