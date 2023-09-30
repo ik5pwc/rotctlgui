@@ -1,3 +1,7 @@
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                            Generic document style                                             */ 
+/* ------------------------------------------------------------------------------------------------------------- */
 @font-face {
   font-family: "digits";
   src: url("compass_7seg.woff") format('woff');
@@ -8,18 +12,33 @@ body {
   overflow-y: hidden;
 }
 
-::-webkit-scrollbar {
-  display: none;
-}
+/* Disable showing scrollbar */
+::-webkit-scrollbar {  display: none; }
 
-.container {
-  position: absolute;
-  top:5px;
-  left:20px;
-}
-
-.title {
+/* Set common values for DIV */
+div { 
+  font-family: sans-serif; 
   position: relative;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                         title & settings buttons                                              */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* Configure button */
+img#configure {
+  position: absolute;
+  top:8px;
+  right:8px;
+  width:24px;
+  height:24px;
+  cursor: pointer;
+  z-index: 10;
+}  
+
+
+/* rotator name */
+div#title {
   top:0px;
   height: 35px;
   width:100%;
@@ -27,23 +46,25 @@ body {
   text-align: center;
   overflow: hidden;
   font-size: 30px;
-  font-family: sans-serif;
   margin-bottom:5px;
 }
 
-.containerStop {
-  position: relative;
-  top:0px;
-  height: 15px;
-  width:100%;
-  text-align: center;
-  margin-bottom:3px;
-  margin-top:-2px;
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                        Compass-related objects style                                          */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* Compass */
+canvas#compass {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
 }
+
+/* stop indicator common style */
 .stop {
   color: white;
   font-size: 13px;
-  font-family: sans-serif;
   font-weight: bold;
   background-color: red;
   width: fit-content;
@@ -51,15 +72,48 @@ body {
   margin: auto;
 }
 
-.compass {
-  position:relative;
-  top:0px;
-  left:0px;
+/* positioning stop */
+.stop#south    { margin-top:3px; margin-bottom:0px;}
+.stop#north    { margin-top:0px;margin-bottom:3px}
+
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                                Rotate buttons                                                 */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+
+/* push button style */
+.turn {
+  border-radius: 6px;
+  border: 1px solid white;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: white;
+  background: #3e3e3e;
+  width: 40px;
+  height: 40px;
+  top: -50px;
+  display: flex;
+  cursor: pointer;
+  overflow: hidden;
+  align-items: center;
+  justify-content: space-evenly;
 }
- 
-.degree {
+
+/* Buttons position */
+.turn#cw  {float:right;}
+.turn#ccw {float:left;}
+
+/* emulate push button only when enabled class has been added */
+.turn.on:active:hover {background-color: #26d126;}
+
+
+
+/* ------------------------------------------------------------------------------------------------------------- */
+/*                                      DIV boxes for current AZ and preset                                      */ 
+/* ------------------------------------------------------------------------------------------------------------- */
+div#degree {
   font-family: 'digits', Fallback, sans-serif;
-  position: absolute;; 
+  margin:auto; 
   border: 1px solid white;
   border-radius: 5px;
   background: rgba(80, 103, 193, 0.61);
@@ -70,75 +124,36 @@ body {
   font-weight: bold;
   width:2.5em;
   text-align: center;
+  background-color: rgba(234, 61, 61, 0.61);  /* by default consder it "OFF" */
 }
 
-.off {background-color: rgba(234, 61, 61, 0.61)}
-.on {background: rgba(80, 103, 193, 0.61);}
+/* degree style when connected */
+div#degree.on {background: rgba(80, 103, 193, 0.61);}
 
-.preset_new {
-  position: absolute;
-  top:30;
-  left:30;
-  font-family:Sans-serif; 
+/* common style for all preset boxes */
+.preset {
   border: 0px; 
   background: #181817b2;
   padding:0.3em;
   z-index:10;
-  color:rgba(230, 50, 50, 1);   
   font-size: 1em;
   font-weight: bold;
   width:2.5em;
   text-align: center;
   visibility: hidden;
+  margin:auto
 }
 
+/* override specific boxes */
+div#preset_new {color:rgba(230, 50, 50, 1);font-size: 1.5em;}
+div#preset_cur {color:rgb(63, 255, 183); }
 
-.preset_cur {
-  position: absolute;
-  top:30;
-  left:30;
-  font-family:Sans-serif; 
-  background: #181817b2;
-  border: 0px; 
-  padding:0.3em;
-  z-index:5;
-  color:rgb(63, 255, 183);   
-  font-size: 1em;
-  font-weight: bold;
-  width:2.5em;
+/* version indicator box */
+div#version {
   text-align: center;
-  visibility: hidden;
-}
-
-.button {
-  border-radius: 6px;
-  font-family: sans-serif;
-  color: white;
-  border: 1px solid white;
-  font-size: 0.9em;
-  width: 40px;
-  height: 40px;
-  text-align: center;
-  font-weight: bold;
-  background: #3e3e3e;
-  vertical-align: middle;
-  display: table-cell;
-  cursor: pointer;
-  overflow: hidden;
-  position:relative;
-  top:-50px;
-}
-
-.push {background-color: #26d126;}
-
-.version {
-  position: relative;
-  text-align: center;
-  /*top: 0px;*/
   bottom:0px;
   left:0px;
   color: #CCCCCC;
-  font-family: sans-serif;
   font-size: 12px;
 }
 
@@ -146,43 +161,16 @@ body {
 
 
 
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
 
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
 
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
-}
 
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
 
-.configure {
-  position: absolute;
-  width:min-content;
-  height:min-content;
-  top:4px;
-  right:4px;
-  z-index: 10;
-}
 
-.configure img {
-  cursor: pointer;
-  width:24px;
-  height:24px;
-}
+
+
+
+
+
 
 
 .configure .tooltiptext {
@@ -218,11 +206,3 @@ body {
   border:1px solid red;
   opacity: 1;
 }
-/*
-.configure:hover {
-  visibility: visible;
-  cursor: pointer;
-  border:1px solid violet;
-  opacity: 1;
-}
-*/

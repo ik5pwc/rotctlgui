@@ -9,6 +9,7 @@
 */
 
 
+
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                        Event Handlers (from html)                                         /*
 /* --------------------------------------------------------------------------------------------------------- */
@@ -18,18 +19,36 @@
  * -------------------------------
  * Attach listeners to HTML objects
  *
- * Invoked by:
- * . page onload           (gui/config/config.html)
+ * Invoked by DOM onChange:
+ * . #name                 (gui/config/config.html)
+ * . #address              (gui/config/config.html)
+ * . #port                 (gui/config/config.html)
+ * . #polling              (gui/config/config.html)
+ * . #error                (gui/config/config.html)
+ * . #stopN                (gui/config/config.html)
+ * . #stopS                (gui/config/config.html)
+ * . #rotctlgui            (gui/config/config.html)
+ * . #hamlib               (gui/config/config.html)
+ * . #filename             (gui/config/config.html)
  *
  * Called Sub/Functions: NONE
  *
  * Global variables used: NONE 
  * 
- * DOM items affected:
- * . save                  (gui/config/config.html)
- * . control passed ia obj parameter
+ * DOM items affected (onChange)
+ * . #name                 (gui/config/config.html)
+ * . #address              (gui/config/config.html)
+ * . #port                 (gui/config/config.html)
+ * . #polling              (gui/config/config.html)
+ * . #error                (gui/config/config.html)
+ * . #stopN                (gui/config/config.html)
+ * . #stopS                (gui/config/config.html)
+ * . #rotctlgui            (gui/config/config.html)
+ * . #hamlib               (gui/config/config.html)
+ * . #filename             (gui/config/config.html)
  *  
- * Arguments:     window.electronAPI.tx_getConfig();
+ * Arguments:    
+ * . obj: DOM element triggering the function
  */
 function checkValues (obj) {
   let valid = null;    // Need a 3-state value. true removes error indicato, false enable error indicator and
@@ -74,7 +93,6 @@ function checkValues (obj) {
          (document.getElementById('rotctlgui').cheked && g_currentCFG.moveTo == 'Y' ) ||
          (document.getElementById('hamlib').checked && g_currentCFG.moveTo == 'N' )   
        ) {save = true;}
-
   }
 
   // enable/disable save button
@@ -93,7 +111,7 @@ function checkValues (obj) {
  * . DOM                        (gui/config/config.html)
  *
  * Called Sub/Functions: 
- * .electronAPI.config_tx_save  (gui/config/js/preload_config.js)
+ * . saveConfig                 (gui/config/js/preload_config.js)
  *
  * Global variables used: 
  * . g_currentCFG               (gui/config/js/config.js)
@@ -122,16 +140,16 @@ function btnSave(btn) {
     if (document.getElementById('stopN').checked ){stopAt = 0;} else {stopAt = 180;}
     if (document.getElementById('hamlib').checked ){pCommand = 'Y';} else {pCommand = 'N';}
                                         
-    window.electronAPI.config_tx_save({ name   : document.getElementById('name').value ,
-                                        address: document.getElementById('address').value,
-                                        port   : document.getElementById('port').value,
-                                        polling: document.getElementById('polling').value,
-                                        error  : document.getElementById('error').value,
-                                        stop   : stopAt,
-                                        moveTo : pCommand,
-                                        file   : document.getElementById('filename').value,
-                                        path   : document.getElementById('filepath').innerHTML
-                                      })
+    window.electronAPI.saveConfig({ name   : document.getElementById('name').value ,
+                                    address: document.getElementById('address').value,
+                                    port   : document.getElementById('port').value,
+                                    polling: document.getElementById('polling').value,
+                                    error  : document.getElementById('error').value,
+                                    stop   : stopAt,
+                                    moveTo : pCommand,
+                                    file   : document.getElementById('filename').value,
+                                    path   : document.getElementById('filepath').innerHTML
+                                  })
   }
 }
 
@@ -143,10 +161,10 @@ function btnSave(btn) {
  * Code executed when clicking cancel button
  * 
  * Invoked by:
- * . DOM                         (gui/config/config.html)
+ * . DOM                        (gui/config/config.html)
  *
  * Called Sub/Functions: 
- * .electronAPI.config_tx_cancel (gui/config/js/preload_config.js)
+ * .cancelConfig                (gui/config/js/preload_config.js)
  *
  * Global variables used: NONE
  * . g_currentCFG               (gui/config/js/config.js)
@@ -164,7 +182,7 @@ function btnCancel () {
   }
   
   // Invoke window close (if not aborted before)
-  window.electronAPI.tx_cancel();
+  window.electronAPI.cancelConfig();
 }
 
 
@@ -218,33 +236,33 @@ function toggleHelp (help,icon) {
 /* --------------------------------------------------------------------------------------------------------- */
 
 /*------------------------------------------------------
- * config_rx_allconf
+ * window.electronAPI.getConfig
  * -------------------------------
  * Populate GUI items with current configured values.
  * 
  * Invoked by:
- * . electronAPI                (gui/config/js/ipc-render-main.js)
+ * . IPC  main_tx_sendConfig   (gui/config/js/preload_config.js)
  *
  * Called Sub/Functions: NONE
  *
  * Global variables used: 
- * . g_currentCFG               (gui/config/js/config.js)
+ * . g_currentCFG              (gui/config/js/config.js)
  * 
  * DOM items affected:
- * . name                       (gui/config/config.html)
- * . address                    (gui/config/config.html)
- * . port                       (gui/config/config.html)
- * . polling                    (gui/config/config.html)
- * . error                      (gui/config/config.html)
- * . stopN                      (gui/config/config.html)
- * . stopS                      (gui/config/config.html)
- * . rotctlgui                  (gui/config/config.html)
- * . hamlib                     (gui/config/config.html)
- * 
+ * . name                      (gui/config/config.html)
+ * . address                   (gui/config/config.html)
+ * . port                      (gui/config/config.html)
+ * . polling                   (gui/config/config.html)
+ * . error                     (gui/config/config.html)
+ * . stopN                     (gui/config/config.html)
+ * . stopS                     (gui/config/config.html)
+ * . rotctlgui                 (gui/config/config.html)
+ * . hamlib                    (gui/config/config.html)
  *
- * Arguments: NONE
+ * Arguments: 
+ * - jsonString: a JSON-format string with all settings
 */
-window.electronAPI.rx_main_allconf((_event,jsonString) => {
+window.electronAPI.getConfig((_event,jsonString) => {
 
   // Extract data from JSON and put in "local" global var
   let json = JSON.parse(jsonString);

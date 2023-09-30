@@ -9,38 +9,34 @@
 */
 
 /* --------------------- Required modules --------------------- */
-const Net               = require('node:net'); 
-const config            = require('./configFile.js');
-const myClasses         = require('./myclasses.js');
-const main              = require('./main.js');
+const Net       = require('node:net'); 
+const config    = require('./configFile.js');
+const myClasses = require('./myclasses.js');
+const main      = require('./main.js');
 
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                              Global objects                                               /*
 /* --------------------------------------------------------------------------------------------------------- */
 
+const client = new Net.Socket();                   // TCP Socket
+const g_status = new myClasses.protocolStatus();   // protocol-related informations
 
-const client = new Net.Socket();                 // TCP Socket
-const status = new myClasses.protocolStatus();   // protocol-related informations
+// Real constant: how many errors before closing connection
+const MAX_ERRORS = 3;
 
 
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                            Exported Functions                                             /*
 /* --------------------------------------------------------------------------------------------------------- */
 
-
 module.exports = {
   startPolling,
   connect,
   setTarget,
   turn
-  /*configure*/ 
 }
 
-
-function configure (cfg) {
-  config = JSON.parse(cfg)
-}
 
 
 /*------------------------------------------------------
@@ -52,28 +48,28 @@ function configure (cfg) {
  * . event emitter          (main.js)
  *
  * Called Sub/Functions: 
- * . sendCommand            (rotctlProtocol.js)
- * . turn                   (rotctlProtocol.js)
- * . stopMotor              (rotctlProtocol.js)
+ * . sendCommand            (this file)
+ * . turn                   (this file)
+ * . stopMotor              (this file)
  *
  * Global variables used: 
- * . status                 (rotctlProtocol.js)
+ * . g_status               (this file)
  * . main.config            (main.js)
  *
  * Arguments:
  * . target: pointer to configuration structure managing all configuration states
 */
 function setTarget (target) {
-  let current = status.azimuth;   // copy of current pointing
+  let current = g_status.azimuth;   // copy of current pointing
   let motor = "S"                 // set current motor status as STOP
 
   console.log("Pointing to " + target);
   
   // Store target in global status
-  status.target = parseInt(target);
+  g_status.target = parseInt(target);
   
   // check target > minSkew
-  if (Math.abs(status.azimuth - status.target) < config.error) {
+  if (Math.abs(g_status.azimuth - g_status.target) < config.error) {
     // target near to current azimuth, report as done
     main.onTarget(); 
     turn("S");
@@ -81,8 +77,8 @@ function setTarget (target) {
   } else {
     if (config.moveTo == 'Y') {
         // Rotor support "P" command, all job is performed by rotctld
-        status.motor = "P"
-        sendCommand("+P " + status.target + ".0 0.0") 
+        g_status.motor = "P"
+        sendCommand("+P " + g_status.target + ".0 0.0") 
     } else {
       // Manage values when stop is at 180
       if (target > 180)  {target -= 2*config.stop;} 
@@ -114,23 +110,23 @@ function setTarget (target) {
  * . direction: can be CW or CCW or S to sopr motor
 */
 function turn(direction) {
-  if (status.isConnected) {
+  if (g_status.isConnected) {
     switch (direction) {
       case "CW":
         console.log("Turning rotor CW");
         sendCommand("+M 16 0");
-        status.motor = "CW";
+        g_status.motor = "CW";
         break;
       case "CCW":
         console.log("Turning rotor CCW");
         sendCommand("+M 8 0");
-        status.motor = "CCW";
+        g_status.motor = "CCW";
         break;
       case "S":
         console.log("Stopping motor");
         sendCommand("+S");
 
-        status.motor = "S";
+        g_status.motor = "S";
         break;
     }
   }
@@ -187,14 +183,14 @@ function connect() {
  * Called Sub/Functions: NONE
  *
  * Global variables used: 
- * . status                 (rotctlProtocol.js)
+ * . g_status               (thi file)
  *
  * Arguments: 
  * . rate: polling rate in milliseconds
 */
 function startPolling(rate) {
-  if (status.pollID != 0) {clearInterval(status.poll)}
-  status.pollID = setInterval(() => {if (status.connected) {sendCommand("+p")}},rate);
+  if (g_status.pollID != 0) {clearInterval(g_status.poll)}
+  g_status.pollID = setInterval(() => {if (g_status.connected) {sendCommand("+p")}},rate);
 }
 
 
@@ -216,7 +212,7 @@ function startPolling(rate) {
  * Called Sub/Functions: NONE
  *
  * Global variables used: 
- * . status                 (rotctlProtocol.js)
+ * . g_status               (this file)
  * . client                 (rotctlProtocol.js)
  * 
  * Arguments: 
@@ -225,7 +221,7 @@ function startPolling(rate) {
 function sendCommand(cmd) {
   // Send command only if connection is established
   if (! client.closed) { 
-    status.sent.push(cmd); 
+    g_status.sent.push(cmd); 
     client.write (cmd + "\n");
   }
 }
@@ -238,16 +234,16 @@ function sendCommand(cmd) {
  * Evaluate replies to sent commands
  *
  * Invoked by:sendCommand(
- * . hdata                  (rotctlProtocol.js)
+ * . client data event      (this file)
  *
  * Called Sub/Functions: 
- * . replyCapabilities      (rotctlProtocol.js)
- * . replyGetPos            (rotctlProtocol.js)
- * . replySetPos            (rotctlProtocol.js)
- * . manageProtocolError    (rotctlProtocol.js)
+ * . replyCapabilities      (this file)
+ * . replyGetPos            (this file)
+ * . replySetPos            (this file)
+ * . manageProtocolError    (this file)
  * 
  * Global variables used: 
- * . status                 (rotctlProtocol.js)
+ * . g_status               (this file)
  * 
  * Arguments: 
  * . reply: string containing reply to be evaluated
@@ -255,7 +251,7 @@ function sendCommand(cmd) {
 function checkReply(reply) {
   let replyOK = false;        // by default reply is wrong
 
-  switch (status.sent.pop().substring(0,2)) {
+  switch (g_status.sent.pop().substring(0,2)) {
     case "1" : replyOK = replyCapabilities(reply); break; 
     case "+p": replyOK = replyGetPos(reply)      ; break;
     case "+P": replyOK = replySetPos(reply)      ; break;       
@@ -264,7 +260,7 @@ function checkReply(reply) {
   }
 
   // if reply has been successfull parsed, then clear error control else evaulate communications
-  if (replyOK) {status.errors = 0;} else {manageProtocolError();}
+  if (replyOK) {g_status.errors = 0;} else {manageProtocolError();}
 }
 
 
@@ -316,7 +312,7 @@ function replyCapabilities(buffer) {
   
   if (model != undefined) { 
     console.log("Rotator model: " + model[1]);
-    status.connected = true;                            // update connection status
+    g_status.connected = true;                            // update connection status
     main.isConnected(true);                             // inform GUI about status
 
     // Valid response detected
@@ -334,20 +330,20 @@ function replyCapabilities(buffer) {
  * Evaluate reply when command sent was "+p"
  *
  * Invoked by:
- * . checkReply             (rotctlProtocol.js)
+ * . checkReply             (this file)
  *
  * Called Sub/Functions: 
- * . sendCommand            (rotctlProtocol.js)
+ * . sendCommand            (this file)
  * . globalEmitter          (node_events.js)
  * 
  * Global variables used: 
- * . status                 (rotctlProtocol.js)
+ * . g_status               (this file)
  * 
  * Arguments: 
  * . buffer: string containing reply to be evaluated
 */
 function replyGetPos(buffer){
-  let target = status.target;     // Target and current position used
+  let target = g_status.target;     // Target and current position used
   let current = 0;                // to perform calculation without altering "master value" 
   
   // Message format
@@ -355,26 +351,26 @@ function replyGetPos(buffer){
   
   if (replyPos != undefined) {
     // Save value and send event to main application
-    status.azimuth = replyPos[1];
-    current = status.azimuth;
-    main.curAzimuth(status.azimuth);
+    g_status.azimuth = replyPos[1];
+    current = g_status.azimuth;
+    main.curAzimuth(g_status.azimuth);
 
     // Computer target and azimuth based on "stop"
     if (current > 180) {current -=2*config.stop;}
     if (target > 180)  {target  -=2*config.stop;}
     
     // Check for target or  errors
-    if ( (status.motor != "S" && status.target != null) &&
-         ( ( status.azimuth == config.stop ) ||                               // Stop position reached
-           (Math.abs(status.azimuth - status.target) < config.error) ||       // near target
-           (current > target && status.motor == "CW") ||
-           (current < target && status.motor == "CCW")                             // target overshot 
+    if ( (g_status.motor != "S" && g_status.target != null) &&
+         ( ( g_status.azimuth == config.stop ) ||                               // Stop position reached
+           (Math.abs(g_status.azimuth - g_status.target) < config.error) ||       // near target
+           (current > target && g_status.motor == "CW") ||
+           (current < target && g_status.motor == "CCW")                             // target overshot 
    
          )
       ) {
          // stop motor and inform target has been reached
          turn("S");
-         status.target = null;
+         g_status.target = null;
          main.onTarget();
     }
 
@@ -388,15 +384,34 @@ function replyGetPos(buffer){
 
 
 
-
-
+/*------------------------------------------------------
+ * Function: manageProtocolError
+ * -------------------------------
+ * Keep track on rotcld protocoll error and disconnect
+ * if limit is reached
+ *
+ * Invoked by:
+ * . checkReply             (this file)
+ *
+ * Called Sub/Functions: 
+ * . sendCommand            (this file)
+ * . globalEmitter          (node_events.js)
+ * 
+ * Global variables used: 
+ * . g_status               (this file)
+ * 
+ * Arguments: 
+ * . buffer: string containing reply to be evaluated
+*/
 function manageProtocolError() {
-    status.errors++;
-    //TODO: controllo errori
-//    console.log ("Command " + rotctlComm.sentCMD + " terminated with error code: " + replyError );
+  // Increment error counter
+  g_status.errors++;
 
+  if (g_status.errors > MAX_ERRORS) {
+     console.error("Too many protocol errors, disconnecting");
+    connect()
+  }
 }
-
 
 
 
@@ -405,7 +420,7 @@ function manageProtocolError() {
 /* --------------------------------------------------------------------------------------------------------- */
 /*                                          Event Receivers and Handlers                                     */
 /* --------------------------------------------------------------------------------------------------------- */
-// Simply ignore any kind of error
+// Simply ignore any protocol of error
 client.on('error',() => {});
 
 
@@ -420,11 +435,11 @@ client.on('error',() => {});
  * . Net                    (nodejs Net module)
  *
  * Called Sub/Functions: 
- * . connect                (rotctlProtocol.js)
+ * . connect                (this file)
  * . main.isConnected       (main.js)
  * 
  * Global variables used: 
- * . status                 (rotctlProtocol.js)
+ * . g_status               (this file)
  * 
  * Arguments: NONE
 */
@@ -438,14 +453,30 @@ client.on('close',() => {
   setTimeout(()=>{connect()},2000);
 
   // clear RX buffer
-  status.rxBuffer = "";
-  status.sent=[];
-  status.connected = false;
+  g_status.rxBuffer = "";
+  g_status.sent=[];
+  g_status.connected = false;
 });
 
 
 
-/* Connection event handlers */
+/*------------------------------------------------------
+ * Event: net.socket connect
+ * -------------------------------
+ * Triggered when socket connects and then send "1" command
+ * to retrieve rotator capabilities (used to check the other
+ * side is really a rotctld instance)
+ *
+ * Invoked by:
+ * . Net                    (nodejs Net module)
+ *
+ * Called Sub/Functions: 
+ * . sendCommand            (this file)
+ * 
+ * Global variables used: NONE 
+ * 
+ * Arguments: NONE
+*/
 client.on("connect",  () => {
   console.log("Connected to " + config.address + ": " + config.port + " . Verify rotctld instance..")
 
@@ -455,25 +486,39 @@ client.on("connect",  () => {
 
 
 
+/*------------------------------------------------------
+ * Event: net.socket data
+ * -------------------------------
+ * Triggered when socket receive data.
+ *
+ * Invoked by:
+ * . Net                    (nodejs Net module)
+ *
+ * Called Sub/Functions: 
+ * . checkReply             (this file)
+ * 
+ * Global variables used: NONE 
+ * 
+ * Arguments: NONE
+*/
 client.on('data',(data) => {
   // Append data to global buffer
   for (let i=0; i<data.length;i++) {
-    status.rxBuffer += data.toString()[i];
+    g_status.rxBuffer += data.toString()[i];
     
     // Parse reply command when answer has been correctly reported
-    let endOfCommand = status.rxBuffer.match("RPRT (-?[0-9]*)\n$")
+    let endOfCommand = g_status.rxBuffer.match("RPRT (-?[0-9]*)\n$")
     
     //End of command ?
     if (  endOfCommand != undefined  ) {
       // Completed without error ?
-      if (endOfCommand[1] != '0') { manageProtocolError() }
-      else {        
+      if (endOfCommand[1] != '0') { 
+        manageProtocolError() 
+      } else {        
         // Evaluate reply and clear buffer
-        checkReply(status.rxBuffer.substring(0,endOfCommand.index));
-        status.rxBuffer = "";
+        checkReply(g_status.rxBuffer.substring(0,endOfCommand.index));
+        g_status.rxBuffer = "";
       }
     }
   }  
 });
-
-
