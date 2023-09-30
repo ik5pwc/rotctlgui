@@ -36,26 +36,25 @@ let winCFG;        // Configuration window
 
 
 /* --------------------------------------------------------------------------------------------------------- */
-/*                                           Application startup                                             */
+/*                               Application startup (app.whenReady event )                                  */
 /* --------------------------------------------------------------------------------------------------------- */
 
-// Assume default path for configuration file
-g_config.path = DEFPATH;
+app.whenReady().then(() => {
+  // Assume default path for configuration file
+  g_config.path = DEFPATH;
 
-// Parse command line switches
-process.argv.forEach( (argv) => {parseCMDLine(argv)})
+  // Parse command line switches
+  process.argv.forEach( (argv) => {parseCMDLine(argv)})
 
-// Read configuration file
-g_config.readConfigFile();
+  // Read configuration file
+  g_config.readConfigFile();
 
-// Start network operation
-g_protocol.startPolling(g_config.polling);
+  // Start network operation
+  g_protocol.startPolling(g_config.polling);
 
-// Load main win
-app.whenReady().then(() => { console.log(app.getLocale());createWinMAIN()});
-
-
-
+  // Load main win
+  createWinMAIN()}
+);
 
 
 
