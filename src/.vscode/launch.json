@@ -7,11 +7,11 @@
         "request": "launch",
         "cwd": "${workspaceFolder}",
         "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
-        
+
         "windows": {
           "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
         },
-        "args" : ["."],
+        "args" : ["main.js", "-c ppp"],
         "outputCapture": "std"
       }
     ]

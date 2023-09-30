@@ -19,7 +19,6 @@ const myClasses = require('./myclasses.js');
 /*                                          Module Global objects                                            /*
 /* --------------------------------------------------------------------------------------------------------- */
 let g_config = new myClasses.config;
-let g_config_json = "";
 
 
 /* --------------------------------------------------------------------------------------------------------- */
@@ -62,7 +61,6 @@ module.exports ={
 
   get json()     { return JSON.stringify(g_config)},
   set json(x) {},
-
 }
 
 
@@ -90,14 +88,13 @@ var os = require("os");         (configFile.js)
  * Arguments:
  * . file: full path to configuration file
 */
-function readConfigFile(dir,file) {
+function readConfigFile() {
   let JSONConfig= ""                              // JSON data from file
   let defcfg = new myClasses.config               // used for default config
-  let fullFilePath = path.join(dir,file);        // full file path
+  let fullFilePath = path.join(g_config.path,g_config.file);        // full file path
 
-  // Set the default config file name and path the same as passed from caller
-  defcfg.path = dir;
-  defcfg.file = file;
+  // Set the default config path 
+  defcfg.path = g_config.path;
 
   // Try to read and parse configuration file
   try {   
@@ -114,8 +111,6 @@ function readConfigFile(dir,file) {
     g_config.error   = JSONConfig.max_degree_error;
     g_config.stop    = JSONConfig.stop_degree;
     g_config.moveTo  = JSONConfig.move_to_supported;
-    g_config.path    = dir;
-    g_config.file    = file;
     
   } catch {
     console.error(fullFilePath + " doesn't exist or is not a properly configured JSON file, creating it using default values...");
@@ -125,17 +120,13 @@ function readConfigFile(dir,file) {
     g_config.address = defcfg.address;
     g_config.port    = defcfg.port;
     g_config.polling = defcfg.polling;
-    g_config.error   = defcfg.max_degree_error;
+    g_config.error   = defcfg.error;
     g_config.stop    = defcfg.stop_degree;
     g_config.moveTo  = defcfg.move_to_supported;
-    g_config.file    = dir;
-    g_config.path    = path;
   
     // Save config file
      writeConfigFile();
   }
-  prova="plutolo";
-  exports.prova = prova;
 }
 
 

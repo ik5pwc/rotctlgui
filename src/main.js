@@ -18,9 +18,7 @@ const g_config    = require('./configFile.js');
 
 /* --------------- Define command line switches --------------- */
 
-app.commandLine.appendSwitch("config");
-app.commandLine.appendSwitch("lang");
-app.commandLine.appendSwitch("loglevel");
+
 
 
 
@@ -29,7 +27,8 @@ app.commandLine.appendSwitch("loglevel");
 /* --------------------------------------------------------------------------------------------------------- */
 
 // Program version
-const VERSION = "1.0a"
+const VERSION = "1.0a";
+const DEFPATH = app.getPath('appData')+"/rotctlGUI/";
 
 let winCompass;    // Compass Window
 let winCFG;        // Configuration window
@@ -40,38 +39,106 @@ let winCFG;        // Configuration window
 /*                                           Application startup                                             */
 /* --------------------------------------------------------------------------------------------------------- */
 
+// Assume default path for configuration file
+g_config.path = DEFPATH;
 
-parseCMDLine()
+// Parse command line switches
+process.argv.forEach( (argv) => {parseCMDLine(argv)})
 
-readConfiguration();
+// Read configuration file
+g_config.readConfigFile();
 
+// Start network operation
 g_protocol.startPolling(g_config.polling);
 
-
-
-app.whenReady().then(() => { createWinMAIN()});
-
-
+// Load main win
+app.whenReady().then(() => { console.log(app.getLocale());createWinMAIN()});
 
 
 
 
 
 
-function parseCMDLine () {
-  // Retrieve command line switches
-  let config   = app.commandLine.getSwitchValue("config");
-  let lang     = app.commandLine.getSwitchValue("lang");
-  let loglevel = app.commandLine.getSwitchValue("loglevel");
+
+
+function parseCMDLine (cmd) {
+  
+  // is a command line switch? i.e. starts with - or --?
+  option = cmd.match(/^(-{1,2}\w*)/);
+
+  if (option != null) {
+    // Detect which command line has been specified
+    switch (option[1].toLowerCase()) {
+      // Config file
+      case '-c': 
+      case '--config': 
+        file = cmd.replace(option[1],'').trim();
+        if (file == '' ) {
+          console.error("Missing value for " + option[1] + " option");
+          displayHelp();
+        } else {
+          // Save value for file name
+          g_config.file = path.basename(file);
+
+          // If no path was specified, then use default one 
+          if (g_config.file == file) {g_config.path = DEFPATH;} else { g_config.path = path.dirname(file);}
+        }
+        break;
+
+      // Application language
+      case 'l':
+      case 'lang':
+
+      // Debug level
+      case 'd':
+      case 'debug':
+
+      // Other command option --> print help and exit
+      default:
+    }
 
 
 
-
+  }
 }
+
+function displayHelp () {
+  console.log("------------------ rotctlGUI ver. " + VERSION + " ------------------\n\n\
+Available command line options\n\
+\n\
+-c, --config <filepath>\n\
+      Specify the name or full path to a rotctlGUI configuration file.\n\
+      When specifying only a file name, rotctlGUI will search\n\
+      within the  default configuration directory \n\
+      (on this system is " + DEFPATH + " ) \n\
+      DEFAULT: default.json \n\
+      EXAMPLES: \n\
+        -c tower1.json \n\
+        --config ./big.json\n\
+        -c c:\\rotator\\rotator1.json\n\
+        -config c:\\users\\luke\\main.json\n\
+\n\
+-l, --lang <ISO-639 code> \n\
+      Application language as two-letters ISO-639 code\n\
+      Current supported languages: en,it\n\
+      DEFAULT: use system language\n\
+      EXAMPLES:\n\
+        -l it\n\
+        --lang it\n\
+\n\
+-d, --debug\n\
+      Print debug messages on standard otput.\n\
+      By default, only ERROR message are displayed \n\
+\n\
+")
+  
+  // Exit applicationtower1
+  app.exit();
+}
+
 
 //TODO: posizione finestra di config
 //TODO: logging avanzato
-//TODO: command line per prendere il nome del file di configurazione
 //TODO: help (punta su github)
 //TODO: lingua in base alla lingua del sistema oppure forzata da cmdline
 //TODO: aprire la dialog per la directory
@@ -130,14 +197,6 @@ const createWinCFG = () => {
 
 
 
-function readConfiguration() {
-  // TODO: qui devo passare i valori eventualmente presi da cmdline
-let file = 'default.json';
-let path = app.getPath('appData')+"/rotctlGUI/";
-
-  // Read configuration file
-  g_config.readConfigFile(path,file);
-}
 
 
 
@@ -177,7 +236,7 @@ ipcMain.on('config_tx_saveConfig'  ,(event,cfg)     => {
   g_config.setAsJSONString(JSON.stringify(cfg));
   g_config.writeConfigFile()
   winCompass.reload();
-  winCFG.close();switchd
+  winCFG.close();
 })
 
 

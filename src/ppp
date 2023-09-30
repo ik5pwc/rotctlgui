@@ -1,0 +1,9 @@
+{
+ "name": "Rotator 1ppp",
+ "address": "localhost",
+ "port": 4533,
+ "polling": 300,
+ "max_degree_error": 5,
+ "stop_degree": 0,
+ "move_to_supported": "Y"
+}
